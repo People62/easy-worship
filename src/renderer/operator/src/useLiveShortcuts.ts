@@ -1,59 +1,118 @@
 import { useEffect } from 'react'
 import type { Overlay } from '@shared/live'
 
-interface Shortcuts {
+export interface Shortcuts {
   onToggleOverlay: (overlay: Exclude<Overlay, 'none'>) => void
   onClearOverlay: () => void
-  onSendPreview: () => void
-  onMovePreview: (delta: number) => void
   onOpenSettings: () => void
+  onShowHelp: () => void
+  onSendPreview: () => void
+  onStepLive: (delta: number) => void
+  onJumpLive: (key: string) => void
+  onMovePreview: (delta: number) => void
+  onMoveSchedule: (delta: number) => void
+  onAddToSchedule: () => void
+  onFocusSearch: () => void
+  onNewSchedule: () => void
+  onOpenSchedule: () => void
+  onSaveSchedule: (saveAs: boolean) => void
 }
 
-const MOVE_KEYS: Record<string, number> = {
-  ArrowLeft: -1,
-  ArrowUp: -1,
-  PageUp: -1,
-  ArrowRight: 1,
-  ArrowDown: 1,
-  PageDown: 1
-}
-
+const NEXT_KEYS = new Set(['ArrowRight', 'PageDown', ' '])
+const PREVIOUS_KEYS = new Set(['ArrowLeft', 'PageUp'])
 const OVERLAY_KEYS: Record<string, Exclude<Overlay, 'none'>> = { F5: 'black', F6: 'clear', F7: 'logo' }
+// 1–9 for verses, C chorus, B bridge, E ending, P pre-chorus, T tag.
+const JUMP_KEY = /^[1-9cbept]$/i
 
 function isTyping(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
 }
 
-// Keyboard shortcuts from the PRD. F5–F7 and Esc work everywhere, even while
-// typing, because they must always be reachable during a service. Enter only
-// sends the preview and the arrow keys move between slides when the
-// operator is not typing.
+// Ctrl+letter shortcuts, which work even while typing in a search box.
+function ctrlShortcut(event: KeyboardEvent, shortcuts: Shortcuts): (() => void) | null {
+  if (!event.ctrlKey || event.altKey) return null
+  switch (event.key.toLowerCase()) {
+    case ',':
+      return shortcuts.onOpenSettings
+    case 'f':
+      return shortcuts.onFocusSearch
+    case 't':
+      return shortcuts.onAddToSchedule
+    case 'n':
+      return shortcuts.onNewSchedule
+    case 'o':
+      return shortcuts.onOpenSchedule
+    case 's':
+      return () => shortcuts.onSaveSchedule(event.shiftKey)
+    default:
+      return null
+  }
+}
+
+// Keyboard shortcuts from the PRD (section 6), so a whole service can run
+// from the keyboard or a presentation clicker (which sends PageUp/PageDown).
+//
+// F5–F7, Esc, F1, and the Ctrl shortcuts work everywhere, even while typing,
+// because they must always be reachable during a service. The keys for
+// moving slides only work when the operator is not typing.
 export function useLiveShortcuts(shortcuts: Shortcuts, enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return
     const onKeyDown = (event: KeyboardEvent): void => {
-      const overlay = OVERLAY_KEYS[event.key]
-      if (overlay) {
+      const typing = isTyping(event.target)
+      const plain = !event.ctrlKey && !event.altKey && !event.metaKey
+      const run = (action: () => void): void => {
         event.preventDefault()
-        shortcuts.onToggleOverlay(overlay)
-      } else if (event.key === 'Escape') {
-        shortcuts.onClearOverlay()
-      } else if (event.ctrlKey && event.key === ',') {
-        event.preventDefault()
-        shortcuts.onOpenSettings()
-      } else if (event.key in MOVE_KEYS && !isTyping(event.target) && !event.altKey) {
-        event.preventDefault()
-        shortcuts.onMovePreview(MOVE_KEYS[event.key])
-      } else if (event.key === 'Enter' && (event.ctrlKey || !isTyping(event.target))) {
-        // On ordinary buttons Enter keeps its normal meaning (click). Slide
-        // thumbnails opt in, so "click a slide, press Enter" sends it.
-        if (event.target instanceof HTMLButtonElement && !event.target.dataset.enterSends) return
-        event.preventDefault()
-        shortcuts.onSendPreview()
+        action()
       }
+
+      const overlay = OVERLAY_KEYS[event.key]
+      if (overlay) return run(() => shortcuts.onToggleOverlay(overlay))
+      if (event.key === 'Escape') return shortcuts.onClearOverlay()
+      if (event.key === 'F1') return run(shortcuts.onShowHelp)
+      const ctrl = ctrlShortcut(event, shortcuts)
+      if (ctrl) return run(ctrl)
+
+      if (event.key === 'Enter' && (event.ctrlKey || !typing)) {
+        // On ordinary buttons Enter keeps its normal meaning (click). Slide
+        // thumbnails and schedule rows opt in, so "pick it, press Enter"
+        // sends it to Live.
+        if (event.target instanceof HTMLButtonElement && !event.target.dataset.enterSends) return
+        return run(shortcuts.onSendPreview)
+      }
+
+      if (typing || !plain) return
+      if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        return run(() => shortcuts.onMovePreview(event.key === 'ArrowRight' ? 1 : -1))
+      }
+      if (NEXT_KEYS.has(event.key)) return run(() => shortcuts.onStepLive(1))
+      if (PREVIOUS_KEYS.has(event.key)) return run(() => shortcuts.onStepLive(-1))
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        return run(() => shortcuts.onMoveSchedule(event.key === 'ArrowDown' ? 1 : -1))
+      }
+      if (JUMP_KEY.test(event.key) && !event.repeat) return run(() => shortcuts.onJumpLive(event.key.toLowerCase()))
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [shortcuts, enabled])
 }
+
+// The list shown in the help dialog (F1).
+export const SHORTCUT_HELP: ReadonlyArray<{ keys: string; action: string }> = [
+  { keys: 'Panah kanan · Page Down · Spasi', action: 'Slide Live berikutnya (juga tombol clicker)' },
+  { keys: 'Panah kiri · Page Up', action: 'Slide Live sebelumnya' },
+  { keys: '1–9 · C · B · E · P · T', action: 'Lompat ke Verse 1–9, Chorus, Bridge, Ending, Pre-Chorus, Tag di Live' },
+  { keys: 'Panah atas · bawah', action: 'Item Schedule sebelumnya/berikutnya (terbuka di Preview)' },
+  { keys: 'Shift + panah kiri/kanan', action: 'Pilih slide di Preview' },
+  { keys: 'Enter', action: 'Kirim Preview ke Live' },
+  { keys: 'F5 · F6 · F7', action: 'Black · Clear · Logo (tekan lagi untuk kembali)' },
+  { keys: 'Esc', action: 'Keluar dari Black, Clear, atau Logo' },
+  { keys: 'Ctrl+F', action: 'Fokus ke kolom cari' },
+  { keys: 'Ctrl+T', action: 'Tambahkan isi Preview ke Schedule' },
+  { keys: 'Ctrl+N · Ctrl+O', action: 'Schedule baru · Buka schedule' },
+  { keys: 'Ctrl+S · Ctrl+Shift+S', action: 'Simpan · Simpan sebagai' },
+  { keys: 'Delete · Ctrl+D · Alt+panah', action: 'Di Schedule: hapus · duplikat · pindahkan item' },
+  { keys: 'Ctrl+,', action: 'Pengaturan' },
+  { keys: 'F1', action: 'Daftar pintasan ini' }
+]

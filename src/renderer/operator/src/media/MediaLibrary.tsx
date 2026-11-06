@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { MediaItem } from '@shared/ipc'
 import { errorMessage } from '../errors'
+import { dragNewItem } from '../schedule/drag'
 import { failedThumbnails } from './useMedia'
 
 interface MediaLibraryProps {
@@ -97,8 +98,10 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
               <button
                 type="button"
                 className={item.id === selectedId ? 'media-card selected' : 'media-card'}
+                draggable
+                onDragStart={(e) => dragNewItem(e, { kind: 'media', mediaId: item.id, title: item.name })}
                 onClick={() => onSelect(item)}
-                title="Klik untuk Preview"
+                title="Klik untuk Preview, seret ke Schedule"
               >
                 <span className="media-thumb">
                   {item.thumbnailUrl ? (

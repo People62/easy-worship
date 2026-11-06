@@ -17,6 +17,19 @@ export interface Slide {
   caption?: string
   // The theme style this slide is shown with. Without it the default is used.
   style?: SlideStyle
+  // Key that jumps to this part of a song: "1"–"9" for verses, "c" chorus,
+  // "b" bridge, "e" ending, "p" pre-chorus, "t" tag. Only the first slide of
+  // each part of a song has it.
+  jump?: string
+}
+
+// Everything that is on Live: all slides of one item (a song, a passage, an
+// announcement), so the operator can move through them with one key.
+export interface LiveDeck {
+  title: string
+  slides: Slide[]
+  // The schedule item it came from, so the Schedule can mark it.
+  source?: string
 }
 
 export interface SlideStyle {
@@ -43,7 +56,10 @@ export interface SlideStyle {
 export type Overlay = 'none' | 'black' | 'clear' | 'logo'
 
 export interface LiveState {
+  // The slide on the TVs. When a deck is live, this is deck.slides[index].
   slide: Slide | null
+  deck: LiveDeck | null
+  index: number
   style: SlideStyle
   overlay: Overlay
   logoUrl: string | null
@@ -69,6 +85,8 @@ export const DEFAULT_SLIDE_STYLE: SlideStyle = {
 
 export const INITIAL_LIVE_STATE: LiveState = {
   slide: null,
+  deck: null,
+  index: 0,
   style: DEFAULT_SLIDE_STYLE,
   overlay: 'none',
   logoUrl: null
@@ -77,7 +95,55 @@ export const INITIAL_LIVE_STATE: LiveState = {
 // Showing a new slide always lifts Black, Clear, and Logo, so the operator
 // never sends a slide that silently stays hidden.
 export function showSlide(state: LiveState, slide: Slide | null): LiveState {
-  return { ...state, slide, overlay: 'none' }
+  return {
+    ...state,
+    slide,
+    deck: slide ? { title: slide.label ?? '', slides: [slide] } : null,
+    index: 0,
+    overlay: 'none'
+  }
+}
+
+export const MAX_DECK_SLIDES = 1000
+
+// Puts a whole item on Live, starting at one of its slides.
+export function showDeck(state: LiveState, deck: LiveDeck, index: number): LiveState {
+  if (deck.slides.length === 0) return showSlide(state, null)
+  const at = clampIndex(index, deck.slides.length)
+  return { ...state, deck, index: at, slide: deck.slides[at]!, overlay: 'none' }
+}
+
+function clampIndex(index: number, length: number): number {
+  return Math.min(Math.max(0, Math.trunc(index) || 0), Math.max(0, length - 1))
+}
+
+// Moves Live to another slide of the same item. Going past the first or
+// last slide does nothing, so an extra press on the clicker never blanks
+// the screen or jumps to another song.
+export function goToSlide(state: LiveState, index: number): LiveState {
+  if (!state.deck) return state
+  const at = clampIndex(index, state.deck.slides.length)
+  if (at === state.index && state.overlay === 'none') return state
+  return { ...state, index: at, slide: state.deck.slides[at]!, overlay: 'none' }
+}
+
+export function stepSlide(state: LiveState, delta: number): LiveState {
+  if (!state.deck) return state
+  const target = state.index + delta
+  if (target < 0 || target >= state.deck.slides.length) return state
+  return goToSlide(state, target)
+}
+
+// Index of the next slide with this jump key after the current one,
+// wrapping around, or -1 if the item has no such part.
+export function findJump(slides: Slide[], key: string, from: number): number {
+  const wanted = key.toLowerCase()
+  const n = slides.length
+  for (let step = 1; step <= n; step++) {
+    const i = (from + step) % n
+    if (slides[i]!.jump === wanted) return i
+  }
+  return -1
 }
 
 // Pressing the same control twice turns it off again.

@@ -1,5 +1,5 @@
 import type { Slide, SlideStyle } from './live'
-import { sectionLabel, type Song, type SongSection } from './songs'
+import { sectionLabel, type SectionKind, type Song, type SongSection } from './songs'
 
 export const MIN_LINES_PER_SLIDE = 1
 export const MAX_LINES_PER_SLIDE = 12
@@ -34,14 +34,33 @@ export function sectionSlideTexts(section: Pick<SongSection, 'text'>, maxLines: 
     .map((lines) => lines.join('\n'))
 }
 
+const JUMP_KEYS: Partial<Record<SectionKind, string>> = {
+  chorus: 'c',
+  bridge: 'b',
+  ending: 'e',
+  'pre-chorus': 'p',
+  tag: 't'
+}
+
+// The key that jumps to a section: the verse number (1–9) or a letter.
+export function sectionJumpKey(section: Pick<SongSection, 'kind' | 'number'>): string | undefined {
+  if (section.kind === 'verse') {
+    const n = section.number ?? 1
+    return n >= 1 && n <= 9 ? String(n) : undefined
+  }
+  return JUMP_KEYS[section.kind]
+}
+
 export function buildSongSlides(song: Pick<Song, 'id' | 'sections'>, maxLines: number, style?: SlideStyle): Slide[] {
   return song.sections.flatMap((section, sectionIndex) => {
     const texts = sectionSlideTexts(section, maxLines)
     const label = sectionLabel(section)
+    const jump = sectionJumpKey(section)
     return texts.map((text, part) => ({
       id: `song:${song.id}:${sectionIndex}:${part}`,
       text,
       label: texts.length > 1 ? `${label} (${part + 1}/${texts.length})` : label,
+      ...(jump && part === 0 ? { jump } : {}),
       ...(style ? { style } : {})
     }))
   })

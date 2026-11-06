@@ -1,12 +1,14 @@
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, Menu, nativeTheme, shell } from 'electron'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import type { DatabaseStatus } from '@shared/ipc'
+import type { DatabaseStatus, OpenedSchedule } from '@shared/ipc'
 import { formatReference, parseReference } from '@shared/bible/reference'
 import { validateSongInput } from '@shared/songs'
 import { validateThemeInput } from '@shared/theme'
 import type { AppSettings } from '@shared/settings'
 import { formatVersionLabel } from '@shared/version'
+import { SCHEDULE_EXTENSION, scheduleNameFromPath, validateScheduleItems } from '@shared/schedule'
 import { readBibleFile } from './bible/importers'
 import { BibleRepository } from './bible/repository'
 import { importLogo, LOGO_EXTENSIONS, logoUrl, removeLogos } from './church/logo'
@@ -17,6 +19,7 @@ import { LiveStore } from './live/store'
 import { IMAGE_EXTENSIONS, MediaLibrary, VIDEO_EXTENSIONS } from './media/library'
 import { OutputManager } from './output/manager'
 import { handleEgwProtocol, registerEgwScheme } from './protocol'
+import { readScheduleFile, RecentSchedules, writeScheduleFile } from './schedule/files'
 import { SettingsStore } from './settings/store'
 import { SongRepository } from './songs/repository'
 import { ThemeRepository } from './themes/repository'
@@ -68,6 +71,21 @@ function createOperatorWindow(): BrowserWindow {
     return { action: 'deny' }
   })
   window.webContents.on('will-navigate', (event) => event.preventDefault())
+
+  // The operator page blocks closing while the schedule has unsaved
+  // changes. Ask here, because a page cannot show its own dialog for it.
+  window.webContents.on('will-prevent-unload', (event) => {
+    const choice = dialog.showMessageBoxSync(window, {
+      type: 'warning',
+      buttons: ['Tutup tanpa menyimpan', 'Batal'],
+      defaultId: 1,
+      cancelId: 1,
+      title: 'Schedule belum disimpan',
+      message: 'Schedule belum disimpan. Tutup aplikasi?',
+      detail: 'Perubahan pada schedule akan hilang.'
+    })
+    if (choice === 0) event.preventDefault()
+  })
 
   // The operator window is the app: closing it closes the output too.
   window.on('closed', () => {
@@ -124,6 +142,30 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
   }
   const themesChanged = (): void => broadcast('themes:changed', themes().list())
 
+  const recent = new RecentSchedules(db)
+  // The renderer may only save over a file the operator picked in a dialog
+  // or that is in the recent list, never a path it made up.
+  const knownSchedulePaths = new Set<string>()
+  const scheduleFilters = [{ name: 'Schedule El-Gibbor Worship', extensions: [SCHEDULE_EXTENSION] }]
+  const remember = (path: string): void => {
+    knownSchedulePaths.add(path)
+    recent.add(path)
+    broadcast('schedule:recent-changed', recent.list())
+  }
+  const openSchedule = async (path: string): Promise<OpenedSchedule> => {
+    try {
+      const { items, skipped } = await readScheduleFile(path)
+      remember(path)
+      return { path, name: scheduleNameFromPath(path), items, skipped }
+    } catch (error) {
+      if (!existsSync(path)) {
+        recent.remove(path)
+        broadcast('schedule:recent-changed', recent.list())
+      }
+      throw error
+    }
+  }
+
   // Every kind of slide needs a theme. New databases get the built-in ones,
   // and they become the defaults.
   if (themeRepository) {
@@ -153,6 +195,9 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'displays:list': () => listDisplays(),
     'live:get': () => live.get(),
     'live:show': (slide) => live.show(slide),
+    'live:show-deck': (deck, index) => live.showDeck(deck, Number(index)),
+    'live:go-to': (index) => live.goTo(Number(index)),
+    'live:step': (delta) => live.step(Number(delta)),
     'live:toggle-overlay': (overlay) => live.toggleOverlay(overlay),
     'live:clear-overlay': () => live.clearOverlay(),
     'output:get-status': () => output.getStatus(),
@@ -275,6 +320,40 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       }
       themesChanged()
     },
+    'schedule:list-recent': () => recent.list(),
+    'schedule:open': async () => {
+      const options = { title: 'Buka schedule', properties: ['openFile' as const], filters: scheduleFilters }
+      const result = operatorWindow
+        ? await dialog.showOpenDialog(operatorWindow, options)
+        : await dialog.showOpenDialog(options)
+      const file = result.filePaths[0]
+      if (result.canceled || !file) return null
+      return openSchedule(file)
+    },
+    'schedule:open-recent': (path) => {
+      if (typeof path !== 'string' || !recent.has(path)) throw new Error('Schedule tidak ada di daftar terakhir.')
+      return openSchedule(path)
+    },
+    'schedule:save': async (input, path) => {
+      const items = validateScheduleItems(input)
+      let target = typeof path === 'string' && (knownSchedulePaths.has(path) || recent.has(path)) ? path : null
+      if (!target) {
+        const date = new Date().toISOString().slice(0, 10)
+        const options = {
+          title: 'Simpan schedule',
+          defaultPath: join(app.getPath('documents'), `Ibadah ${date}.${SCHEDULE_EXTENSION}`),
+          filters: scheduleFilters
+        }
+        const result = operatorWindow
+          ? await dialog.showSaveDialog(operatorWindow, options)
+          : await dialog.showSaveDialog(options)
+        if (result.canceled || !result.filePath) return null
+        target = /\.egw$/i.test(result.filePath) ? result.filePath : `${result.filePath}.${SCHEDULE_EXTENSION}`
+      }
+      await writeScheduleFile(target, items)
+      remember(target)
+      return { path: target, name: scheduleNameFromPath(target) }
+    },
     'bible:get-passage': (id, query) => {
       const version = bible().getVersion(versionId(id))
       if (!version) throw new Error('Terjemahan tidak ditemukan. Mungkin sudah dihapus.')
@@ -287,6 +366,7 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       return {
         versionId: version.id,
         abbreviation: version.abbreviation,
+        reference: formatReference(parsed.reference),
         title: `${formatReference(parsed.reference)} (${version.abbreviation})`,
         verses
       }

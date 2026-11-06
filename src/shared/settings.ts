@@ -33,6 +33,15 @@ export interface AppSettings {
     bible: number | null
     text: number | null
   }
+  // Panel sizes in the operator window, set by dragging the dividers.
+  layout: {
+    // Width of the Schedule column, in pixels.
+    scheduleWidth: number
+    // Part of the remaining width that goes to Preview (the rest is Live).
+    previewShare: number
+    // Height of the Library, in pixels.
+    libraryHeight: number
+  }
 }
 
 export type SettingsPatch = {
@@ -42,6 +51,7 @@ export type SettingsPatch = {
   songs?: Partial<AppSettings['songs']>
   bible?: Partial<AppSettings['bible']>
   themes?: Partial<AppSettings['themes']>
+  layout?: Partial<AppSettings['layout']>
 }
 
 export const DEFAULT_PRIMARY = '#D4A017'
@@ -52,8 +62,25 @@ export const DEFAULT_SETTINGS: AppSettings = {
   church: { logoFile: null },
   songs: { linesPerSlide: DEFAULT_LINES_PER_SLIDE },
   bible: { versionId: null },
-  themes: { song: null, bible: null, text: null }
+  themes: { song: null, bible: null, text: null },
+  layout: { scheduleWidth: 260, previewShare: 0.5, libraryHeight: 280 }
 }
+
+export const LAYOUT_LIMITS: Record<keyof AppSettings['layout'], { min: number; max: number }> = {
+  scheduleWidth: { min: 180, max: 560 },
+  previewShare: { min: 0.25, max: 0.75 },
+  libraryHeight: { min: 160, max: 720 }
+}
+
+// Puts a panel size inside its limits. Sizes come from dragging, so they
+// are clamped rather than rejected.
+export function clampLayout(key: keyof AppSettings['layout'], value: number): number {
+  const { min, max } = LAYOUT_LIMITS[key]
+  const clamped = Math.min(max, Math.max(min, value))
+  return key === 'previewShare' ? Math.round(clamped * 1000) / 1000 : Math.round(clamped)
+}
+
+const LAYOUT_KEYS = Object.keys(LAYOUT_LIMITS) as (keyof AppSettings['layout'])[]
 
 export const PRIMARY_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
   { name: 'Emas', value: '#D4A017' },
@@ -105,6 +132,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const songs = asRecord(root.songs)
   const bible = asRecord(root.bible)
   const themes = asRecord(root.themes)
+  const layout = asRecord(root.layout)
 
   return {
     appearance: {
@@ -128,7 +156,13 @@ export function normalizeSettings(raw: unknown): AppSettings {
       song: isDisplayId(themes.song) ? themes.song : null,
       bible: isDisplayId(themes.bible) ? themes.bible : null,
       text: isDisplayId(themes.text) ? themes.text : null
-    }
+    },
+    layout: Object.fromEntries(
+      LAYOUT_KEYS.map((key) => {
+        const value = layout[key]
+        return [key, Number.isFinite(value) ? clampLayout(key, value as number) : DEFAULT_SETTINGS.layout[key]]
+      })
+    ) as AppSettings['layout']
   }
 }
 
@@ -141,7 +175,8 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
     church: { ...current.church },
     songs: { ...current.songs },
     bible: { ...current.bible },
-    themes: { ...current.themes }
+    themes: { ...current.themes },
+    layout: { ...current.layout }
   }
 
   if (patch.appearance?.mode !== undefined) {
@@ -179,6 +214,12 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
     if (value === undefined) continue
     if (!isDisplayId(value)) throw new Error(`Invalid theme: ${String(value)}`)
     next.themes[kind] = value
+  }
+  for (const key of LAYOUT_KEYS) {
+    const value = patch.layout?.[key]
+    if (value === undefined) continue
+    if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`Invalid panel size: ${String(value)}`)
+    next.layout[key] = clampLayout(key, value)
   }
 
   return next

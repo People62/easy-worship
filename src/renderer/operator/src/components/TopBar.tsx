@@ -11,6 +11,7 @@ interface TopBarProps {
   onToggleOverlay: (overlay: Exclude<Overlay, 'none'>) => void
   onToggleMode: () => void
   onOpenSettings: () => void
+  onShowHelp: () => void
 }
 
 const LIVE_CONTROLS: ReadonlyArray<{ overlay: Exclude<Overlay, 'none'>; label: string; key: string; hint: string }> = [
@@ -20,7 +21,7 @@ const LIVE_CONTROLS: ReadonlyArray<{ overlay: Exclude<Overlay, 'none'>; label: s
 ]
 
 export function TopBar(props: TopBarProps): React.JSX.Element {
-  const { mode, overlay, outputStatus, onToggleOverlay, onToggleMode, onOpenSettings } = props
+  const { mode, overlay, outputStatus, onToggleOverlay, onToggleMode, onOpenSettings, onShowHelp } = props
   const nextLabel = mode === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'
   const outputOk = outputStatus !== null && outputStatus.state !== 'none'
 
@@ -58,6 +59,9 @@ export function TopBar(props: TopBarProps): React.JSX.Element {
         <button type="button" className="btn" onClick={onToggleMode} title={nextLabel} aria-label={nextLabel}>
           {mode === 'dark' ? <MoonIcon /> : <SunIcon />}
           {mode === 'dark' ? 'Gelap' : 'Terang'}
+        </button>
+        <button type="button" className="btn icon-only" onClick={onShowHelp} title="Pintasan keyboard (F1)">
+          ?<span className="sr-only">Pintasan keyboard</span>
         </button>
         <button type="button" className="btn icon-only" onClick={onOpenSettings} title="Pengaturan (Ctrl+,)">
           <GearIcon />

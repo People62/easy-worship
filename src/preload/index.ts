@@ -32,6 +32,9 @@ const api = {
   live: {
     get: () => invoke('live:get'),
     show: (...args: InvokeContract['live:show']['args']) => invoke('live:show', ...args),
+    showDeck: (...args: InvokeContract['live:show-deck']['args']) => invoke('live:show-deck', ...args),
+    goTo: (...args: InvokeContract['live:go-to']['args']) => invoke('live:go-to', ...args),
+    step: (...args: InvokeContract['live:step']['args']) => invoke('live:step', ...args),
     toggleOverlay: (...args: InvokeContract['live:toggle-overlay']['args']) => invoke('live:toggle-overlay', ...args),
     clearOverlay: () => invoke('live:clear-overlay'),
     onChanged: (listener: (state: EventContract['live:changed']) => void) => on('live:changed', listener)
@@ -76,6 +79,14 @@ const api = {
     update: (...args: InvokeContract['themes:update']['args']) => invoke('themes:update', ...args),
     delete: (...args: InvokeContract['themes:delete']['args']) => invoke('themes:delete', ...args),
     onChanged: (listener: (themes: EventContract['themes:changed']) => void) => on('themes:changed', listener)
+  },
+  schedule: {
+    open: () => invoke('schedule:open'),
+    openRecent: (...args: InvokeContract['schedule:open-recent']['args']) => invoke('schedule:open-recent', ...args),
+    save: (...args: InvokeContract['schedule:save']['args']) => invoke('schedule:save', ...args),
+    listRecent: () => invoke('schedule:list-recent'),
+    onRecentChanged: (listener: (recent: EventContract['schedule:recent-changed']) => void) =>
+      on('schedule:recent-changed', listener)
   }
 }
 
