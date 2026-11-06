@@ -13,8 +13,11 @@ import { CheckIcon } from './Icons'
 interface SettingsDialogProps {
   open: boolean
   settings: AppSettings
+  logoUrl: string | null
   error: string | null
   onUpdate: (patch: SettingsPatch) => void
+  onChooseLogo: () => void
+  onRemoveLogo: () => void
   onClose: () => void
 }
 
@@ -41,7 +44,16 @@ function useAppInfo(): AppInfo | null {
   return info
 }
 
-export function SettingsDialog({ open, settings, error, onUpdate, onClose }: SettingsDialogProps): React.JSX.Element {
+export function SettingsDialog({
+  open,
+  settings,
+  logoUrl,
+  error,
+  onUpdate,
+  onChooseLogo,
+  onRemoveLogo,
+  onClose
+}: SettingsDialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const displays = useDisplays()
   const info = useAppInfo()
@@ -161,7 +173,9 @@ export function SettingsDialog({ open, settings, error, onUpdate, onClose }: Set
 
         <section className="setting-group">
           <h3>Layar output</h3>
-          <p className="hint">Layar yang menampilkan slide ke jemaat (HDMI ke TV). Dipakai mulai Tahap 2.</p>
+          <p className="hint">
+            Layar yang menampilkan slide ke jemaat (HDMI ke TV). Layar laptop tidak pernah dipakai sebagai output.
+          </p>
           <select
             className="select"
             value={settings.output.displayId ?? ''}
@@ -170,12 +184,47 @@ export function SettingsDialog({ open, settings, error, onUpdate, onClose }: Set
             }
           >
             <option value="">Pilih otomatis (layar selain layar utama)</option>
-            {displays.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.label} · {d.width}×{d.height}
-              </option>
-            ))}
+            {displays
+              .filter((d) => !d.isPrimary)
+              .map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label} · {d.width}×{d.height}
+                </option>
+              ))}
           </select>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={settings.output.windowed}
+              onChange={(event) => onUpdate({ output: { windowed: event.target.checked } })}
+            />
+            <span>
+              <strong>Mode jendela</strong>
+              <span className="hint-inline">
+                Output tampil di jendela biasa, untuk uji coba tanpa proyektor atau TV.
+              </span>
+            </span>
+          </label>
+        </section>
+
+        <section className="setting-group">
+          <h3>Logo gereja</h3>
+          <p className="hint">Tampil di TV saat tombol Logo (F7) ditekan. Gambar disalin ke folder aplikasi.</p>
+          <div className="logo-row">
+            <div className="logo-preview">
+              {logoUrl ? <img src={logoUrl} alt="Logo gereja" /> : <span>Belum ada logo (memakai ikon EG)</span>}
+            </div>
+            <div className="logo-actions">
+              <button type="button" className="btn" onClick={onChooseLogo}>
+                {logoUrl ? 'Ganti logo…' : 'Pilih logo…'}
+              </button>
+              {logoUrl && (
+                <button type="button" className="btn" onClick={onRemoveLogo}>
+                  Hapus logo
+                </button>
+              )}
+            </div>
+          </div>
         </section>
 
         <section className="setting-group">
