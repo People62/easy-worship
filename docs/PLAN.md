@@ -62,6 +62,8 @@ easy-worship/
 
 **Selesai bila:** installer kosong bisa dipasang dan dibuka di Windows 10.
 
+**Hasil (2026-11-06):** lulus. Installer dari CI terpasang di Windows; aplikasi menampilkan v0.0.0, Electron 45.2.3, dan SQLite 3.53.4.
+
 ### Tahap 1 · Fondasi (S)
 
 - [x] Skema database + sistem migrasi (tabel dari PRD bagian 7).
