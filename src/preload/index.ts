@@ -28,6 +28,22 @@ const api = {
   displays: {
     list: () => invoke('displays:list'),
     onChanged: (listener: (displays: EventContract['displays:changed']) => void) => on('displays:changed', listener)
+  },
+  live: {
+    get: () => invoke('live:get'),
+    show: (...args: InvokeContract['live:show']['args']) => invoke('live:show', ...args),
+    toggleOverlay: (...args: InvokeContract['live:toggle-overlay']['args']) => invoke('live:toggle-overlay', ...args),
+    clearOverlay: () => invoke('live:clear-overlay'),
+    onChanged: (listener: (state: EventContract['live:changed']) => void) => on('live:changed', listener)
+  },
+  output: {
+    getStatus: () => invoke('output:get-status'),
+    onStatusChanged: (listener: (status: EventContract['output:status-changed']) => void) =>
+      on('output:status-changed', listener)
+  },
+  church: {
+    chooseLogo: () => invoke('church:choose-logo'),
+    removeLogo: () => invoke('church:remove-logo')
   }
 }
 
