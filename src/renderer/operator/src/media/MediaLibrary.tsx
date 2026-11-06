@@ -64,7 +64,7 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
         </button>
         <button
           type="button"
-          className="btn"
+          className="btn btn-danger"
           disabled={!selected}
           onClick={() => {
             if (

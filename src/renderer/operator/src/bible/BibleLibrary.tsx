@@ -221,7 +221,7 @@ function VersionRow({
       </button>
       <button
         type="button"
-        className="btn"
+        className="btn btn-danger"
         onClick={() => {
           if (window.confirm(`Hapus ${version.name} (${version.abbreviation}) dari aplikasi?`)) {
             void run(() => window.api.bible.deleteVersion(version.id))

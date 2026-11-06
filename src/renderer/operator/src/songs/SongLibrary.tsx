@@ -41,7 +41,12 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
         <button type="button" className="btn" disabled={!selected} onClick={() => selected && onEdit(selected.id)}>
           Ubah
         </button>
-        <button type="button" className="btn" disabled={!selected} onClick={() => selected && onDelete(selected)}>
+        <button
+          type="button"
+          className="btn btn-danger"
+          disabled={!selected}
+          onClick={() => selected && onDelete(selected)}
+        >
           Hapus
         </button>
       </div>
