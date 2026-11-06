@@ -82,6 +82,20 @@ export const migrations: readonly Migration[] = [
         opened_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
     `
+  },
+  {
+    version: 2,
+    name: 'song search index',
+    // rowid = songs.id. Kept up to date by the song repository on every save.
+    // remove_diacritics makes "Yesus" match "Yésus" and similar spellings.
+    up: `
+      CREATE VIRTUAL TABLE songs_fts USING fts5(
+        title, lyrics, author, keywords,
+        tokenize = 'unicode61 remove_diacritics 2'
+      );
+      CREATE INDEX song_sections_song ON song_sections (song_id, position);
+      CREATE INDEX songs_title ON songs (title COLLATE NOCASE);
+    `
   }
 ]
 
