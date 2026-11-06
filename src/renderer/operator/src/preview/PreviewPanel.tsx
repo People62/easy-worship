@@ -1,9 +1,9 @@
 import type { LiveState, Slide } from '@shared/live'
-import type { Song } from '@shared/songs'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
 
 interface PreviewPanelProps {
-  song: Song | null
+  // Song title or Bible passage, or null when nothing is open.
+  title: string | null
   slides: Slide[]
   selectedIndex: number
   liveSlideId: string | null
@@ -13,7 +13,7 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
-  const { song, slides, selectedIndex, liveSlideId, live, onSelect, onSend } = props
+  const { title, slides, selectedIndex, liveSlideId, live, onSelect, onSend } = props
   const selected = slides[selectedIndex] ?? null
 
   return (
@@ -22,10 +22,10 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
         <SlideRenderer slide={selected} style={live.style} overlay="none" logoUrl={live.logoUrl} />
       </div>
 
-      {song ? (
+      {title ? (
         <>
           <div className="preview-head">
-            <strong>{song.title}</strong>
+            <strong>{title}</strong>
             <span className="muted">
               {selected?.label} · {selectedIndex + 1}/{slides.length}
             </span>
@@ -39,7 +39,7 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
               Kirim ke Live <kbd>Enter</kbd>
             </button>
           </div>
-          <ol className="slide-grid" aria-label="Slide lagu">
+          <ol className="slide-grid" aria-label="Slide">
             {slides.map((slide, index) => (
               <li key={slide.id}>
                 <button
@@ -67,7 +67,9 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
           </ol>
         </>
       ) : (
-        <p className="empty">Pilih lagu di Pustaka untuk melihat slidenya. Panah kiri/kanan memilih slide.</p>
+        <p className="empty">
+          Pilih lagu atau ketik ayat di Pustaka untuk melihat slidenya. Panah kiri/kanan memilih slide.
+        </p>
       )}
     </>
   )
