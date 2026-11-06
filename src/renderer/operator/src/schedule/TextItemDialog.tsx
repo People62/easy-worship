@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { DEFAULT_SLIDE_STYLE, type SlideStyle } from '@shared/live'
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH, textSlides } from '@shared/schedule'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
+import { t } from '@shared/i18n'
 
 interface TextItemDialogProps {
   // The announcement to edit, or null for a new one.
@@ -23,24 +24,27 @@ export function TextItemDialog({ initial, style, onSave, onClose }: TextItemDial
     dialogRef.current?.showModal()
   }, [])
 
-  const slides = useMemo(() => textSlides({ uid: 'draft', title: title || 'Teks', body }, style), [title, body, style])
+  const slides = useMemo(
+    () => textSlides({ uid: 'draft', title: title || t('Teks'), body }, style),
+    [title, body, style]
+  )
 
   const save = (): void => {
     if (!title.trim()) return setError('Judul wajib diisi.')
-    if (slides.length === 0) return setError('Isi teks masih kosong.')
+    if (slides.length === 0) return setError(t('Isi teks masih kosong.'))
     onSave({ title: title.trim(), body })
   }
 
   return (
     <dialog ref={dialogRef} className="dialog dialog-wide" onClose={onClose} aria-labelledby="text-item-title">
       <header className="dialog-head">
-        <h2 id="text-item-title">{initial ? 'Ubah slide teks' : 'Slide teks baru'}</h2>
+        <h2 id="text-item-title">{initial ? t('Ubah slide teks') : t('Slide teks baru')}</h2>
         <div className="row">
           <button type="button" className="btn" onClick={() => dialogRef.current?.close()}>
-            Batal
+            {t('Batal')}
           </button>
           <button type="button" className="btn btn-primary" onClick={save}>
-            Simpan
+            {t('Simpan')}
           </button>
         </div>
       </header>
@@ -48,17 +52,17 @@ export function TextItemDialog({ initial, style, onSave, onClose }: TextItemDial
       <div className="dialog-body text-item-editor">
         <div className="text-item-fields">
           <label className="field">
-            <span>Judul *</span>
+            <span>{t('Judul *')}</span>
             <input
               value={title}
               maxLength={MAX_TITLE_LENGTH}
-              placeholder="Contoh: Pengumuman, Persembahan"
+              placeholder={t('Contoh: Pengumuman, Persembahan')}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
             />
           </label>
           <label className="field">
-            <span>Isi</span>
+            <span>{t('Isi')}</span>
             <textarea
               className="text-item-body"
               value={body}
@@ -74,7 +78,7 @@ export function TextItemDialog({ initial, style, onSave, onClose }: TextItemDial
               }}
             />
           </label>
-          <p className="hint">Baris kosong memulai slide baru. Ctrl+Enter untuk menyimpan.</p>
+          <p className="hint">{t('Baris kosong memulai slide baru. Ctrl+Enter untuk menyimpan.')}</p>
         </div>
 
         <div className="text-item-preview">
@@ -87,7 +91,9 @@ export function TextItemDialog({ initial, style, onSave, onClose }: TextItemDial
             />
           </div>
           <p className="hint">
-            {slides.length === 0 ? 'Belum ada slide.' : `${slides.length} slide. Pratinjau slide pertama.`}
+            {slides.length === 0
+              ? t('Belum ada slide.')
+              : t('{n} slide. Pratinjau slide pertama.', { n: slides.length })}
           </p>
         </div>
 

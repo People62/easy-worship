@@ -3,6 +3,7 @@ import type { NewScheduleItem } from '@shared/schedule'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
 import { PlusIcon, SendIcon } from '../components/Icons'
 import { dragNewItem } from '../schedule/drag'
+import { t } from '@shared/i18n'
 
 interface PreviewPanelProps {
   // Song title or Bible passage, or null when nothing is open.
@@ -30,21 +31,21 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
             draggable={scheduleItem !== null}
             onDragStart={(e) => scheduleItem && dragNewItem(e, scheduleItem)}
             className={scheduleItem ? 'draggable' : undefined}
-            title={scheduleItem ? `${title} · seret ke Schedule` : (title ?? undefined)}
+            title={scheduleItem ? t('{title} · seret ke Schedule', { title: title ?? '' }) : (title ?? undefined)}
           >
-            {title ?? 'Belum ada item'}
+            {title ?? t('Belum ada item')}
           </strong>
           <span className="deck-meta">
             {title
               ? `${selected?.label ?? ''} · ${selectedIndex + 1}/${slides.length}`
-              : 'Pilih dari Schedule atau Pustaka'}
+              : t('Pilih dari Schedule atau Pustaka')}
           </span>
         </div>
         <div className="deck-actions">
           {scheduleItem && (
-            <button type="button" className="btn" onClick={onAddToSchedule} title="Tambahkan ke Schedule (Ctrl+T)">
+            <button type="button" className="btn" onClick={onAddToSchedule} title={t('Tambahkan ke Schedule (Ctrl+T)')}>
               <PlusIcon />
-              Schedule
+              {t('Schedule')}
             </button>
           )}
           <button
@@ -52,10 +53,10 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
             className="btn btn-primary"
             disabled={!selected}
             onClick={() => onSend(selectedIndex)}
-            title="Kirim ke TV, mulai dari slide terpilih"
+            title={t('Kirim ke TV, mulai dari slide terpilih')}
           >
             <SendIcon />
-            Live <kbd>Enter</kbd>
+            {t('Live')} <kbd>Enter</kbd>
           </button>
         </div>
       </div>
@@ -67,7 +68,7 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
       </div>
 
       {title ? (
-        <ol className="slide-grid" aria-label="Slide">
+        <ol className="slide-grid" aria-label={t('Slide')}>
           {slides.map((slide, index) => (
             <li key={slide.id}>
               <button
@@ -80,13 +81,13 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
                 data-enter-sends="true"
                 onClick={() => onSelect(index)}
                 onDoubleClick={() => onSend(index)}
-                title="Klik untuk memilih, klik dua kali untuk langsung ke Live"
+                title={t('Klik untuk memilih, klik dua kali untuk langsung ke Live')}
               >
                 <span className="thumb-frame">
                   <SlideRenderer slide={slide} style={live.style} overlay="none" logoUrl={null} />
                 </span>
                 <span className="thumb-label">
-                  {slide.id === liveSlideId && <span className="live-dot" aria-label="sedang tampil" />}
+                  {slide.id === liveSlideId && <span className="live-dot" aria-label={t('sedang tampil')} />}
                   {slide.label}
                 </span>
               </button>
@@ -95,7 +96,9 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
         </ol>
       ) : (
         <p className="empty deck-empty">
-          Pilih item di Schedule, atau lagu dan ayat di Pustaka, untuk melihat slidenya. Shift+panah memilih slide.
+          {t(
+            'Pilih item di Schedule, atau lagu dan ayat di Pustaka, untuk melihat slidenya. Shift+panah memilih slide.'
+          )}
         </p>
       )}
     </div>

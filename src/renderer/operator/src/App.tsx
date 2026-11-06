@@ -29,6 +29,7 @@ import { useAppearance } from './theme/useAppearance'
 import { useLiveShortcuts, type Shortcuts } from './useLiveShortcuts'
 import { useOutputStatus } from './useOutputStatus'
 import { useSettings } from './useSettings'
+import { setLanguage, t } from '@shared/i18n'
 
 // The song editor is either closed, open for a new song, or open for one song.
 type EditorState = { open: false } | { open: true; song: Song | null }
@@ -104,6 +105,12 @@ function toScheduleItem(preview: PreviewItem | null): NewScheduleItem | null {
 
 export function App(): React.JSX.Element {
   const { settings, update, error } = useSettings()
+  // Every t() below reads the current language, so set it before rendering.
+  const language = settings?.general.language ?? 'id'
+  setLanguage(language)
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
   const mode = useAppearance(settings?.appearance)
   const live = useLive()
   const outputStatus = useOutputStatus()
@@ -178,7 +185,8 @@ export function App(): React.JSX.Element {
         switch (item.kind) {
           case 'song': {
             const song = await window.api.songs.get(item.songId)
-            if (!song) throw new Error(`Lagu "${item.title}" tidak ada di pustaka. Mungkin sudah dihapus.`)
+            if (!song)
+              throw new Error(t('Lagu "{title}" tidak ada di pustaka. Mungkin sudah dihapus.', { title: item.title }))
             return done({ kind: 'song', song })
           }
           case 'bible': {
@@ -187,12 +195,14 @@ export function App(): React.JSX.Element {
             const version =
               versions.find((v) => v.id === item.versionId) ??
               versions.find((v) => v.abbreviation === item.abbreviation)
-            if (!version) throw new Error(`Terjemahan ${item.abbreviation || ''} belum diimpor di komputer ini.`)
+            if (!version)
+              throw new Error(t('Terjemahan {abbr} belum diimpor di komputer ini.', { abbr: item.abbreviation }))
             return done({ kind: 'bible', passage: await window.api.bible.getPassage(version.id, item.reference) })
           }
           case 'media': {
             const found = media?.find((m) => m.id === item.mediaId)
-            if (!found) throw new Error(`Media "${item.title}" tidak ada di pustaka. Mungkin sudah dihapus.`)
+            if (!found)
+              throw new Error(t('Media "{title}" tidak ada di pustaka. Mungkin sudah dihapus.', { title: item.title }))
             return done({ kind: 'media', item: found })
           }
           case 'text':
@@ -274,7 +284,7 @@ export function App(): React.JSX.Element {
   }, [libraryTab])
 
   const deleteSong = (song: SongSummary): void => {
-    if (!window.confirm(`Hapus lagu "${song.title}"? Ini tidak bisa dibatalkan.`)) return
+    if (!window.confirm(t('Hapus lagu "{title}"? Ini tidak bisa dibatalkan.', { title: song.title }))) return
     void run(async () => {
       await window.api.songs.delete(song.id)
       if (previewSong?.id === song.id) showPreview(null)
@@ -333,7 +343,7 @@ export function App(): React.JSX.Element {
     measureSplitWidth
   )
 
-  if (!settings || !live) return <div className="loading">Memuat…</div>
+  if (!settings || !live) return <div className="loading">{t('Memuat…')}</div>
 
   const inSchedule = !!preview?.scheduleUid && schedule.items.some((item) => item.uid === preview.scheduleUid)
   const editingText = textEditor.open && textEditor.index !== null ? schedule.items[textEditor.index] : undefined
@@ -358,7 +368,7 @@ export function App(): React.JSX.Element {
           gridTemplateRows: `minmax(0, 1fr) 8px min(${toRem(layout.libraryHeight)}, 60%)`
         }}
       >
-        <Panel title="Schedule" className="area-schedule">
+        <Panel title={t('Schedule')} className="area-schedule">
           <SchedulePanel
             schedule={schedule}
             actions={scheduleActions}
@@ -370,9 +380,9 @@ export function App(): React.JSX.Element {
             onError={report}
           />
         </Panel>
-        <Splitter direction="columns" label="Lebar Schedule" className="area-split-1" {...splitters.schedule} />
+        <Splitter direction="columns" label={t('Lebar Schedule')} className="area-split-1" {...splitters.schedule} />
 
-        <Panel title="Preview" className="area-preview">
+        <Panel title={t('Preview')} className="area-preview">
           <PreviewPanel
             title={previewTitle(preview)}
             slides={slides}
@@ -385,10 +395,15 @@ export function App(): React.JSX.Element {
             onAddToSchedule={addPreviewToSchedule}
           />
         </Panel>
-        <Splitter direction="columns" label="Lebar Preview dan Live" className="area-split-2" {...splitters.preview} />
+        <Splitter
+          direction="columns"
+          label={t('Lebar Preview dan Live')}
+          className="area-split-2"
+          {...splitters.preview}
+        />
 
         <Panel
-          title="Live"
+          title={t('Live')}
           live
           badge={live.overlay === 'none' ? null : OVERLAY_BADGES[live.overlay]}
           className="area-live"
@@ -396,7 +411,7 @@ export function App(): React.JSX.Element {
           <LivePanel live={live} />
         </Panel>
 
-        <Splitter direction="rows" label="Tinggi Pustaka" className="area-split-3" {...splitters.library} />
+        <Splitter direction="rows" label={t('Tinggi Pustaka')} className="area-split-3" {...splitters.library} />
 
         <Library
           active={libraryTab}
@@ -418,7 +433,7 @@ export function App(): React.JSX.Element {
                   onSetDefault={(patch) => void update({ themes: patch })}
                 />
               ) : (
-                <EmptyState>Memuat…</EmptyState>
+                <EmptyState>{t('Memuat…')}</EmptyState>
               ),
             bible: (
               <BibleLibrary
@@ -454,7 +469,7 @@ export function App(): React.JSX.Element {
         <div className="toast" role="alert">
           {actionError}
           <button type="button" className="btn" onClick={() => setActionError(null)}>
-            Tutup
+            {t('Tutup')}
           </button>
         </div>
       )}

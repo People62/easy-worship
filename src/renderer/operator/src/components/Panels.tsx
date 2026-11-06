@@ -1,4 +1,5 @@
 import { BookIcon, ImageIcon, MusicIcon, PaletteIcon } from './Icons'
+import { t } from '@shared/i18n'
 
 interface PanelProps {
   title: string
@@ -44,7 +45,7 @@ export function Library(props: {
   const { tabs, active, onChange: setActive } = props
 
   return (
-    <section className="panel library" aria-label="Pustaka">
+    <section className="panel library" aria-label={t('Pustaka')}>
       <div className="tabs" role="tablist">
         {LIBRARY_TABS.map(({ id, label, Icon }) => (
           <button
@@ -56,7 +57,7 @@ export function Library(props: {
             onClick={() => setActive(id)}
           >
             <Icon />
-            {label}
+            {t(label)}
           </button>
         ))}
       </div>

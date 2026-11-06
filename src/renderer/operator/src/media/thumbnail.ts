@@ -1,4 +1,5 @@
 import type { MediaInfo, MediaItem } from '@shared/ipc'
+import { t } from '@shared/i18n'
 
 const THUMB_WIDTH = 320
 const THUMB_HEIGHT = 180
@@ -39,7 +40,7 @@ function imageInfo(url: string): Promise<MediaInfo> {
         durationMs: null,
         thumbnail: draw(image, image.naturalWidth, image.naturalHeight)
       })
-    image.onerror = () => reject(new Error('Gambar tidak bisa dibaca.'))
+    image.onerror = () => reject(new Error(t('Gambar tidak bisa dibaca.')))
     image.src = url
   })
 }
@@ -64,7 +65,7 @@ function videoInfo(url: string): Promise<MediaInfo> {
       video.removeAttribute('src')
       video.load()
     }
-    video.onerror = () => reject(new Error('Video tidak bisa diputar. Gunakan MP4 (H.264) atau WEBM.'))
+    video.onerror = () => reject(new Error(t('Video tidak bisa diputar. Gunakan MP4 (H.264) atau WEBM.')))
     video.src = url
   })
 }

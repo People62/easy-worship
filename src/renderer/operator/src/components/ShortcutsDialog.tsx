@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { SHORTCUT_HELP } from '../useLiveShortcuts'
+import { shortcutHelp } from '../useLiveShortcuts'
+import { t } from '@shared/i18n'
 
 export function ShortcutsDialog({ onClose }: { onClose: () => void }): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -10,15 +11,15 @@ export function ShortcutsDialog({ onClose }: { onClose: () => void }): React.JSX
   return (
     <dialog ref={dialogRef} className="dialog" onClose={onClose} aria-labelledby="shortcuts-title">
       <header className="dialog-head">
-        <h2 id="shortcuts-title">Pintasan keyboard</h2>
+        <h2 id="shortcuts-title">{t('Pintasan keyboard')}</h2>
         <button type="button" className="btn" onClick={() => dialogRef.current?.close()} autoFocus>
-          Tutup
+          {t('Tutup')}
         </button>
       </header>
       <div className="dialog-body">
         <table className="shortcut-table">
           <tbody>
-            {SHORTCUT_HELP.map((row) => (
+            {shortcutHelp().map((row) => (
               <tr key={row.keys}>
                 <th scope="row">
                   <kbd>{row.keys}</kbd>

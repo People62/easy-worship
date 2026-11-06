@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildSongSlides } from '@shared/slides'
 import { formatLyrics, parseLyrics, sectionLabel, type Song, type SongInput } from '@shared/songs'
 import { errorMessage } from '../errors'
+import { t } from '@shared/i18n'
 
 interface SongEditorDialogProps {
   // null = new song.
@@ -78,13 +79,13 @@ export function SongEditorDialog({ song, linesPerSlide, onSaved, onClose }: Song
       aria-labelledby="song-editor-title"
     >
       <header className="dialog-head">
-        <h2 id="song-editor-title">{song ? 'Ubah lagu' : 'Lagu baru'}</h2>
+        <h2 id="song-editor-title">{song ? t('Ubah lagu') : t('Lagu baru')}</h2>
         <div className="row">
           <button type="button" className="btn" onClick={() => dialogRef.current?.close()}>
-            Batal
+            {t('Batal')}
           </button>
           <button type="button" className="btn btn-primary" disabled={saving} onClick={() => void save()}>
-            Simpan <kbd>Ctrl+S</kbd>
+            {t('Simpan')} <kbd>Ctrl+S</kbd>
           </button>
         </div>
       </header>
@@ -92,52 +93,58 @@ export function SongEditorDialog({ song, linesPerSlide, onSaved, onClose }: Song
       <div className="dialog-body song-editor">
         <div className="song-fields">
           <label className="field field-wide">
-            <span>Judul *</span>
+            <span>{t('Judul *')}</span>
             <input value={draft.title} onChange={set('title')} autoFocus maxLength={200} />
           </label>
           <label className="field">
-            <span>Pengarang</span>
+            <span>{t('Pengarang')}</span>
             <input value={draft.author} onChange={set('author')} maxLength={200} />
           </label>
           <label className="field">
-            <span>Kata kunci</span>
+            <span>{t('Kata kunci')}</span>
             <input
               value={draft.keywords}
               onChange={set('keywords')}
-              placeholder="Contoh: NKB 12, natal"
+              placeholder={t('Contoh: NKB 12, natal')}
               maxLength={500}
             />
           </label>
           <label className="field">
-            <span>Hak cipta</span>
+            <span>{t('Hak cipta')}</span>
             <input value={draft.copyright} onChange={set('copyright')} maxLength={300} />
           </label>
           <label className="field">
-            <span>Nomor CCLI</span>
+            <span>{t('Nomor CCLI')}</span>
             <input value={draft.ccli} onChange={set('ccli')} maxLength={20} />
           </label>
         </div>
 
         <div className="lyrics-area">
           <label className="field lyrics-field">
-            <span>Lirik</span>
+            <span>{t('Lirik')}</span>
             <textarea value={draft.lyrics} onChange={set('lyrics')} spellCheck={false} />
           </label>
           <aside className="lyrics-help">
-            <h3>Penanda bagian</h3>
+            <h3>{t('Penanda bagian')}</h3>
             <p>
-              Tulis di baris sendiri: <code>[Verse 1]</code> atau <code>[Bait 1]</code>, <code>[Reff]</code> atau{' '}
-              <code>[Chorus]</code>, <code>[Pre Reff]</code>, <code>[Bridge]</code>, <code>[Ending]</code>.
+              {t('Tulis di baris sendiri:')} <code>[Verse 1]</code> {t('atau')} <code>[Bait 1]</code>,{' '}
+              <code>[Reff]</code> {t('atau')} <code>[Chorus]</code>, <code>[Pre Reff]</code>, <code>[Bridge]</code>,{' '}
+              <code>[Ending]</code>.
             </p>
-            <p>Baris kosong di dalam satu bagian = pindah slide.</p>
-            <h3>Hasil</h3>
+            <p>{t('Baris kosong di dalam satu bagian = pindah slide.')}</p>
+            <h3>{t('Hasil')}</h3>
             <p>
-              {sections.length} bagian · {slideCount} slide (maks. {linesPerSlide} baris per slide)
+              {t('{sections} bagian · {slides} slide (maks. {lines} baris per slide)', {
+                sections: sections.length,
+                slides: slideCount,
+                lines: linesPerSlide
+              })}
             </p>
             <ul className="section-chips">
               {sections.map((section, index) => (
                 <li key={index}>
-                  {sectionLabel(section)} · {section.text.split('\n').filter((l) => l.trim()).length} baris
+                  {sectionLabel(section)} ·{' '}
+                  {t('{n} baris', { n: section.text.split('\n').filter((l) => l.trim()).length })}
                 </li>
               ))}
             </ul>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { t } from '@shared/i18n'
 import type { Overlay } from '@shared/live'
 
 export interface Shortcuts {
@@ -99,20 +100,25 @@ export function useLiveShortcuts(shortcuts: Shortcuts, enabled: boolean): void {
 }
 
 // The list shown in the help dialog (F1).
-export const SHORTCUT_HELP: ReadonlyArray<{ keys: string; action: string }> = [
-  { keys: 'Panah kanan · Page Down · Spasi', action: 'Slide Live berikutnya (juga tombol clicker)' },
-  { keys: 'Panah kiri · Page Up', action: 'Slide Live sebelumnya' },
-  { keys: '1–9 · C · B · E · P · T', action: 'Lompat ke Verse 1–9, Chorus, Bridge, Ending, Pre-Chorus, Tag di Live' },
-  { keys: 'Panah atas · bawah', action: 'Item Schedule sebelumnya/berikutnya (terbuka di Preview)' },
-  { keys: 'Shift + panah kiri/kanan', action: 'Pilih slide di Preview' },
-  { keys: 'Enter', action: 'Kirim Preview ke Live' },
-  { keys: 'F5 · F6 · F7', action: 'Black · Clear · Logo (tekan lagi untuk kembali)' },
-  { keys: 'Esc', action: 'Keluar dari Black, Clear, atau Logo' },
-  { keys: 'Ctrl+F', action: 'Fokus ke kolom cari' },
-  { keys: 'Ctrl+T', action: 'Tambahkan isi Preview ke Schedule' },
-  { keys: 'Ctrl+N · Ctrl+O', action: 'Schedule baru · Buka schedule' },
-  { keys: 'Ctrl+S · Ctrl+Shift+S', action: 'Simpan · Simpan sebagai' },
-  { keys: 'Delete · Ctrl+D · Alt+panah', action: 'Di Schedule: hapus · duplikat · pindahkan item' },
-  { keys: 'Ctrl+,', action: 'Pengaturan' },
-  { keys: 'F1', action: 'Daftar pintasan ini' }
-]
+export function shortcutHelp(): Array<{ keys: string; action: string }> {
+  return [
+    { keys: t('Panah kanan · Page Down · Spasi'), action: t('Slide Live berikutnya (juga tombol clicker)') },
+    { keys: t('Panah kiri · Page Up'), action: t('Slide Live sebelumnya') },
+    {
+      keys: '1–9 · C · B · E · P · T',
+      action: t('Lompat ke Verse 1–9, Chorus, Bridge, Ending, Pre-Chorus, Tag di Live')
+    },
+    { keys: t('Panah atas · bawah'), action: t('Item Schedule sebelumnya/berikutnya (terbuka di Preview)') },
+    { keys: t('Shift + panah kiri/kanan'), action: t('Pilih slide di Preview') },
+    { keys: 'Enter', action: t('Kirim Preview ke Live') },
+    { keys: 'F5 · F6 · F7', action: t('Black · Clear · Logo (tekan lagi untuk kembali)') },
+    { keys: 'Esc', action: t('Keluar dari Black, Clear, atau Logo') },
+    { keys: 'Ctrl+F', action: t('Fokus ke kolom cari') },
+    { keys: 'Ctrl+T', action: t('Tambahkan isi Preview ke Schedule') },
+    { keys: 'Ctrl+N · Ctrl+O', action: t('Schedule baru · Buka schedule') },
+    { keys: 'Ctrl+S · Ctrl+Shift+S', action: t('Simpan · Simpan sebagai') },
+    { keys: t('Delete · Ctrl+D · Alt+panah'), action: t('Di Schedule: hapus · duplikat · pindahkan item') },
+    { keys: 'Ctrl+,', action: t('Pengaturan') },
+    { keys: 'F1', action: t('Daftar pintasan ini') }
+  ]
+}

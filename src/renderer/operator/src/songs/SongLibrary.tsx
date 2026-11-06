@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { SongSummary } from '@shared/songs'
 import { dragNewItem } from '../schedule/drag'
 import { useSongSearch } from './useSongSearch'
+import { t } from '@shared/i18n'
 
 interface SongLibraryProps {
   selectedId: number | null
@@ -23,8 +24,8 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
           className="search"
           type="search"
           value={query}
-          placeholder="Cari judul, lirik, atau kata kunci (contoh: NKB 12)…"
-          aria-label="Cari lagu"
+          placeholder={t('Cari judul, lirik, atau kata kunci (contoh: NKB 12)…')}
+          aria-label={t('Cari lagu')}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             // Enter in the search box opens the best match in Preview.
@@ -36,10 +37,10 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
           }}
         />
         <button type="button" className="btn btn-primary" onClick={onCreate}>
-          + Lagu baru
+          {t('+ Lagu baru')}
         </button>
         <button type="button" className="btn" disabled={!selected} onClick={() => selected && onEdit(selected.id)}>
-          Ubah
+          {t('Ubah')}
         </button>
         <button
           type="button"
@@ -47,7 +48,7 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
           disabled={!selected}
           onClick={() => selected && onDelete(selected)}
         >
-          Hapus
+          {t('Hapus')}
         </button>
       </div>
 
@@ -55,10 +56,12 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
 
       {results.length === 0 ? (
         <p className="empty">
-          {query.trim() ? `Tidak ada lagu yang cocok dengan "${query.trim()}".` : 'Belum ada lagu. Klik "+ Lagu baru".'}
+          {query.trim()
+            ? t('Tidak ada lagu yang cocok dengan "{query}".', { query: query.trim() })
+            : t('Belum ada lagu. Klik "+ Lagu baru".')}
         </p>
       ) : (
-        <ul className="song-list" role="listbox" aria-label="Daftar lagu">
+        <ul className="song-list" role="listbox" aria-label={t('Daftar lagu')}>
           {results.map((song) => (
             <li key={song.id} role="option" aria-selected={song.id === selectedId}>
               <button
@@ -68,7 +71,7 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
                 onDragStart={(e) => dragNewItem(e, { kind: 'song', songId: song.id, title: song.title })}
                 onClick={() => onSelect(song)}
                 onDoubleClick={() => onEdit(song.id)}
-                title="Klik untuk Preview, seret ke Schedule, klik dua kali untuk mengubah"
+                title={t('Klik untuk Preview, seret ke Schedule, klik dua kali untuk mengubah')}
               >
                 <span className="song-title">{song.title}</span>
                 <span className="song-first-line">{song.firstLine}</span>
