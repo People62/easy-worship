@@ -1,4 +1,5 @@
 import { bookById, findBooks, type BibleBook } from './books'
+import { t } from '../i18n'
 
 // A passage the operator asked for. Verse ranges may cross chapters
 // ("kej 1:31-2:3"). A whole chapter ("mzm 23") has no verses.
@@ -25,25 +26,28 @@ export function parseReference(input: string): ParseResult {
   const text = input.trim().replace(/[–—]/g, '-')
   // Book: optional leading number, then letters (with spaces or hyphens).
   const match = /^([1-3]\s*)?([\p{L}][\p{L}\s.-]*?)\s*(\d.*)?$/u.exec(text)
-  if (!match) return { ok: false, error: 'Ketik nama kitab, contoh: yoh 3:16', suggestions: [] }
+  if (!match) return { ok: false, error: t('Ketik nama kitab, contoh: yoh 3:16'), suggestions: [] }
 
   const bookText = `${match[1] ?? ''}${match[2]}`
   const books = findBooks(bookText)
-  if (books.length === 0) return { ok: false, error: `Kitab "${bookText.trim()}" tidak dikenal.`, suggestions: [] }
+  if (books.length === 0)
+    return { ok: false, error: t('Kitab "{book}" tidak dikenal.', { book: bookText.trim() }), suggestions: [] }
   if (books.length > 1) {
     return {
       ok: false,
-      error: `"${bookText.trim()}" bisa berarti beberapa kitab. Ketik lebih lengkap.`,
+      error: t('"{book}" bisa berarti beberapa kitab. Ketik lebih lengkap.', { book: bookText.trim() }),
       suggestions: books
     }
   }
   const book = books[0]
 
   const rest = (match[3] ?? '').replace(/\s+/g, ' ').trim()
-  if (!rest) return { ok: false, error: `Ketik pasal, contoh: ${book.abbreviation} 1`, suggestions: [book] }
+  if (!rest)
+    return { ok: false, error: t('Ketik pasal, contoh: {abbr} 1', { abbr: book.abbreviation }), suggestions: [book] }
 
   const ranges = parseRanges(rest)
-  if (!ranges) return { ok: false, error: 'Format pasal dan ayat tidak dikenali. Contoh: 3:16-18', suggestions: [book] }
+  if (!ranges)
+    return { ok: false, error: t('Format pasal dan ayat tidak dikenali. Contoh: 3:16-18'), suggestions: [book] }
   return { ok: true, reference: { book: book.id, ranges } }
 }
 

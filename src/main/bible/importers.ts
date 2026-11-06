@@ -3,6 +3,7 @@ import { basename, extname } from 'node:path'
 import { SaxesParser, type SaxesTagPlain } from 'saxes'
 import { bookById, bookByOsis, findBooks } from '@shared/bible/books'
 import type { BibleVerse } from '@shared/bible/slides'
+import { t } from '@shared/i18n'
 
 export type BibleFormat = 'zefania' | 'osis' | 'opensong'
 
@@ -76,7 +77,7 @@ export function parseBibleXml(xml: string, fallbackName = 'Alkitab'): ImportedBi
       if (name === 'xmlbible') format = 'zefania'
       else if (name === 'osis') format = 'osis'
       else if (name === 'bible') format = 'opensong'
-      else throw new Error('Format file tidak dikenali. Gunakan Zefania XML, OSIS, atau OpenSong.')
+      else throw new Error(t('Format file tidak dikenali. Gunakan Zefania XML, OSIS, atau OpenSong.'))
       if (format === 'zefania') meta.name = attr(node, 'biblename') ?? ''
       return
     }
@@ -183,8 +184,8 @@ export function parseBibleXml(xml: string, fallbackName = 'Alkitab'): ImportedBi
   parser.write(xml.replace(/^\uFEFF/, '')).close()
   finishVerse()
 
-  if (!format) throw new Error('File kosong atau bukan XML.')
-  if (verses.length === 0) throw new Error('Tidak ada ayat yang terbaca dari file ini.')
+  if (!format) throw new Error(t('File kosong atau bukan XML.'))
+  if (verses.length === 0) throw new Error(t('Tidak ada ayat yang terbaca dari file ini.'))
 
   const name = meta.name || fallbackName
   return {
@@ -208,13 +209,15 @@ export function parseBibleXml(xml: string, fallbackName = 'Alkitab'): ImportedBi
 
 export async function readBibleFile(path: string): Promise<ImportedBible> {
   const info = await stat(path)
-  if (info.size > MAX_FILE_BYTES) throw new Error('File terlalu besar (maksimal 100 MB).')
+  if (info.size > MAX_FILE_BYTES) throw new Error(t('File terlalu besar (maksimal 100 MB).'))
   const xml = await readFile(path, 'utf8')
   try {
     return parseBibleXml(xml, basename(path, extname(path)))
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     // saxes reports XML syntax errors as "line:column: message".
-    throw new Error(/^\d+:\d+: /.test(message) ? `File XML rusak (${message}).` : message, { cause: error })
+    throw new Error(/^\d+:\d+: /.test(message) ? t('File XML rusak ({detail}).', { detail: message }) : message, {
+      cause: error
+    })
   }
 }

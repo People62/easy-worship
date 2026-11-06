@@ -1,13 +1,12 @@
 import { isHexColor, normalizeHex } from './color'
 import { DEFAULT_SLIDE_STYLE, type Background, type SlideStyle } from './live'
+import { t } from './i18n'
 
 export type ThemeKind = 'song' | 'bible' | 'text'
 export const THEME_KINDS: readonly ThemeKind[] = ['song', 'bible', 'text']
 
-export const THEME_KIND_LABELS: Record<ThemeKind, string> = {
-  song: 'Lagu',
-  bible: 'Alkitab',
-  text: 'Teks bebas'
+export function themeKindLabel(kind: ThemeKind): string {
+  return { song: t('Lagu'), bible: t('Alkitab'), text: t('Teks bebas') }[kind]
 }
 
 export interface Theme {
@@ -132,8 +131,8 @@ export function resolveBackground(background: Background, findMedia: (id: number
 export function validateThemeInput(input: unknown): ThemeInput {
   const raw = (typeof input === 'object' && input !== null ? input : {}) as Record<string, unknown>
   const name = typeof raw.name === 'string' ? raw.name.trim().slice(0, 100) : ''
-  if (!name) throw new Error('Nama tema wajib diisi.')
-  if (!THEME_KINDS.includes(raw.kind as ThemeKind)) throw new Error('Jenis tema tidak valid.')
+  if (!name) throw new Error(t('Nama tema wajib diisi.'))
+  if (!THEME_KINDS.includes(raw.kind as ThemeKind)) throw new Error(t('Jenis tema tidak valid.'))
   const kind = raw.kind as ThemeKind
   return { name, kind, style: normalizeStyle(raw.style, DEFAULT_THEMES[kind].style) }
 }

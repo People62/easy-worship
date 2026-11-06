@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { formatReference, parseReference } from '@shared/bible/reference'
 import type { BiblePassage, BibleVersionInfo } from '@shared/ipc'
 import { errorMessage } from '../errors'
+import { locale, t } from '@shared/i18n'
 
 interface BibleLibraryProps {
   versionId: number | null
@@ -47,32 +48,38 @@ export function BibleLibrary({ versionId, onVersionChange, onOpenPassage }: Bibl
     try {
       const result = await window.api.bible.importFile()
       if (!result) return
-      const skipped = result.skippedBooks > 0 ? ` ${result.skippedBooks} kitab di luar 66 kitab dilewati.` : ''
+      const skipped =
+        result.skippedBooks > 0 ? ' ' + t('{n} kitab di luar 66 kitab dilewati.', { n: result.skippedBooks }) : ''
       setNotice(
-        `${result.version.name} (${result.version.abbreviation}) berhasil diimpor: ${result.version.verseCount.toLocaleString('id-ID')} ayat.${skipped}`
+        t('{name} ({abbr}) berhasil diimpor: {count} ayat.', {
+          name: result.version.name,
+          abbr: result.version.abbreviation,
+          count: result.version.verseCount.toLocaleString(locale())
+        }) + skipped
       )
       setError(null)
       onVersionChange(result.version.id)
     } catch (err) {
-      setError(`Gagal mengimpor: ${errorMessage(err)}`)
+      setError(t('Gagal mengimpor: {error}', { error: errorMessage(err) }))
     }
   }
 
-  if (versions === null) return <p className="empty">Memuat…</p>
+  if (versions === null) return <p className="empty">{t('Memuat…')}</p>
 
   if (versions.length === 0) {
     return (
       <div className="bible-empty">
         <p>
-          Belum ada Alkitab. Impor file Alkitab dalam format <strong>Zefania XML</strong>, <strong>OSIS</strong>, atau{' '}
-          <strong>OpenSong</strong>.
+          {t('Belum ada Alkitab. Impor file Alkitab dalam format')} <strong>Zefania XML</strong>, <strong>OSIS</strong>,{' '}
+          {t('atau')} <strong>OpenSong</strong>.
         </p>
         <p className="hint">
-          Terjemahan Baru (TB) milik Lembaga Alkitab Indonesia dan berhak cipta, jadi tidak disertakan di aplikasi.
-          Gunakan file yang Anda miliki izinnya. Untuk mencoba, terjemahan domain publik seperti KJV bisa dipakai.
+          {t(
+            'Terjemahan Baru (TB) milik Lembaga Alkitab Indonesia dan berhak cipta, jadi tidak disertakan di aplikasi. Gunakan file yang Anda miliki izinnya. Untuk mencoba, terjemahan domain publik seperti KJV bisa dipakai.'
+          )}
         </p>
         <button type="button" className="btn btn-primary" onClick={() => void importBible()}>
-          Impor Alkitab…
+          {t('Impor Alkitab…')}
         </button>
         {error && <p className="field-error">{error}</p>}
       </div>
@@ -85,7 +92,7 @@ export function BibleLibrary({ versionId, onVersionChange, onOpenPassage }: Bibl
         <select
           className="select version-select"
           value={active?.id ?? ''}
-          aria-label="Terjemahan"
+          aria-label={t('Terjemahan')}
           onChange={(event) => onVersionChange(Number(event.target.value))}
         >
           {versions.map((v) => (
@@ -98,8 +105,8 @@ export function BibleLibrary({ versionId, onVersionChange, onOpenPassage }: Bibl
           className="search"
           type="search"
           value={query}
-          placeholder="Ketik ayat, contoh: yoh 3:16-18, mzm 23, 1kor 13:4"
-          aria-label="Referensi ayat"
+          placeholder={t('Ketik ayat, contoh: yoh 3:16-18, mzm 23, 1kor 13:4')}
+          aria-label={t('Referensi ayat')}
           aria-invalid={parsed?.ok === false}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
@@ -111,7 +118,7 @@ export function BibleLibrary({ versionId, onVersionChange, onOpenPassage }: Bibl
           }}
         />
         <button type="button" className="btn btn-primary" disabled={!parsed?.ok} onClick={() => void open(query)}>
-          Tampilkan
+          {t('Tampilkan')}
         </button>
         <button type="button" className="btn" onClick={() => setManaging((m) => !m)}>
           {managing ? 'Selesai' : 'Kelola'}
@@ -175,7 +182,7 @@ function VersionManager({
         ))}
       </ul>
       <button type="button" className="btn" onClick={onImport}>
-        + Impor Alkitab lain…
+        {t('+ Impor Alkitab lain…')}
       </button>
     </div>
   )
@@ -206,29 +213,33 @@ function VersionRow({
       <input
         value={abbreviation}
         onChange={(e) => setAbbreviation(e.target.value)}
-        aria-label="Singkatan"
+        aria-label={t('Singkatan')}
         maxLength={12}
       />
-      <input value={name} onChange={(e) => setName(e.target.value)} aria-label="Nama terjemahan" maxLength={200} />
-      <span className="muted">{version.verseCount.toLocaleString('id-ID')} ayat</span>
+      <input value={name} onChange={(e) => setName(e.target.value)} aria-label={t('Nama terjemahan')} maxLength={200} />
+      <span className="muted">{t('{count} ayat', { count: version.verseCount.toLocaleString(locale()) })}</span>
       <button
         type="button"
         className="btn"
         disabled={!changed}
         onClick={() => void run(() => window.api.bible.renameVersion(version.id, name, abbreviation))}
       >
-        Simpan
+        {t('Simpan')}
       </button>
       <button
         type="button"
-        className="btn"
+        className="btn btn-danger"
         onClick={() => {
-          if (window.confirm(`Hapus ${version.name} (${version.abbreviation}) dari aplikasi?`)) {
+          if (
+            window.confirm(
+              t('Hapus {name} ({abbr}) dari aplikasi?', { name: version.name, abbr: version.abbreviation })
+            )
+          ) {
             void run(() => window.api.bible.deleteVersion(version.id))
           }
         }}
       >
-        Hapus
+        {t('Hapus')}
       </button>
     </li>
   )

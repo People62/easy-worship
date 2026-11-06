@@ -1,8 +1,23 @@
 import { useState } from 'react'
 import type { RecentSchedule } from '@shared/ipc'
-import { SCHEDULE_KIND_LABELS, type ScheduleItem } from '@shared/schedule'
+import { scheduleKindLabel, type ScheduleItem } from '@shared/schedule'
+import {
+  BookIcon,
+  ChevronDownIcon,
+  CopyIcon,
+  EditIcon,
+  FileIcon,
+  FolderIcon,
+  ImageIcon,
+  MusicIcon,
+  PlusIcon,
+  SaveIcon,
+  TextIcon,
+  TrashIcon
+} from '../components/Icons'
 import { dragRow, isScheduleDrag, readDrop } from './drag'
 import { selectedIndex, type ScheduleActions, type ScheduleState } from './useSchedule'
+import { locale, t } from '@shared/i18n'
 
 interface SchedulePanelProps {
   schedule: ScheduleState
@@ -16,8 +31,18 @@ interface SchedulePanelProps {
   onError: (error: unknown) => void
 }
 
-// Small letters shown before each item, so the kinds are easy to tell apart.
-const KIND_MARK: Record<ScheduleItem['kind'], string> = { song: 'L', bible: 'A', media: 'M', text: 'T' }
+// An icon per kind, so the kinds are easy to tell apart at a glance.
+const KIND_ICON: Record<ScheduleItem['kind'], (props: { size?: number }) => React.JSX.Element> = {
+  song: MusicIcon,
+  bible: BookIcon,
+  media: ImageIcon,
+  text: TextIcon
+}
+
+function KindIcon({ kind }: { kind: ScheduleItem['kind'] }): React.JSX.Element {
+  const Icon = KIND_ICON[kind]
+  return <Icon />
+}
 
 export function SchedulePanel(props: SchedulePanelProps): React.JSX.Element {
   const { schedule, actions, recent, liveUid, onOpenItem, onNewText, onEditText, onError } = props
@@ -74,54 +99,74 @@ export function SchedulePanel(props: SchedulePanelProps): React.JSX.Element {
   return (
     <div className="schedule">
       <div className="schedule-head">
-        <strong className="schedule-name" title={schedule.path ?? 'Belum disimpan'}>
-          {schedule.name}
-          {schedule.dirty && <span className="dirty-mark" title="Belum disimpan" aria-label="belum disimpan" />}
-        </strong>
-        <div className="schedule-toolbar">
-          <button type="button" className="btn" onClick={() => actions.reset()} title="Schedule baru (Ctrl+N)">
-            Baru
-          </button>
-          <button type="button" className="btn" onClick={() => guard(actions.open)} title="Buka schedule (Ctrl+O)">
-            Buka
+        <div className="schedule-name" title={schedule.path ?? 'Belum pernah disimpan'}>
+          <strong>{schedule.name ?? t('Schedule baru')}</strong>
+          <span className={schedule.dirty ? 'save-state dirty' : 'save-state'}>
+            {schedule.dirty ? t('Belum disimpan') : schedule.path ? t('Tersimpan') : t('Kosong')}
+          </span>
+        </div>
+        <button
+          type="button"
+          className={schedule.dirty ? 'btn btn-sm btn-attention' : 'btn btn-sm'}
+          onClick={() => guard(() => actions.save())}
+          title={t('Simpan (Ctrl+S). Simpan sebagai: Ctrl+Shift+S')}
+        >
+          <SaveIcon />
+          {t('Simpan')}
+        </button>
+      </div>
+      <div className="schedule-toolbar">
+        <button
+          type="button"
+          className="btn btn-sm"
+          onClick={() => actions.reset()}
+          title={t('Schedule baru (Ctrl+N)')}
+        >
+          <FileIcon />
+          {t('Baru')}
+        </button>
+        <span className="btn-group">
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => guard(actions.open)}
+            title={t('Buka schedule (Ctrl+O)')}
+          >
+            <FolderIcon />
+            {t('Buka')}
           </button>
           <button
             type="button"
-            className="btn"
+            className="btn btn-sm icon-only"
             aria-expanded={recentOpen}
             disabled={recent.length === 0}
             onClick={() => setRecentOpen((o) => !o)}
-            title="Schedule terakhir"
+            title={t('Schedule terakhir')}
           >
-            ▾<span className="sr-only">Schedule terakhir</span>
+            <ChevronDownIcon />
+            <span className="sr-only">{t('Schedule terakhir')}</span>
           </button>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => guard(() => actions.save())}
-            title="Simpan (Ctrl+S). Simpan sebagai: Ctrl+Shift+S"
-          >
-            Simpan
-          </button>
-        </div>
+        </span>
       </div>
 
       {recentOpen && (
-        <ul className="recent-schedules" aria-label="Schedule terakhir">
+        <ul className="recent-schedules" aria-label={t('Schedule terakhir')}>
           {recent.map((r) => (
             <li key={r.path}>
               <button
                 type="button"
                 className="recent-row"
                 disabled={!r.exists}
-                title={r.exists ? r.path : `File tidak ditemukan: ${r.path}`}
+                title={r.exists ? r.path : t('File tidak ditemukan: {path}', { path: r.path })}
                 onClick={() => {
                   setRecentOpen(false)
                   guard(() => actions.openRecent(r.path))
                 }}
               >
                 <span>{r.name}</span>
-                <span className="muted">{r.exists ? new Date(r.openedAt).toLocaleDateString('id-ID') : 'hilang'}</span>
+                <span className="muted">
+                  {r.exists ? new Date(r.openedAt).toLocaleDateString(locale()) : t('hilang')}
+                </span>
               </button>
             </li>
           ))}
@@ -130,7 +175,7 @@ export function SchedulePanel(props: SchedulePanelProps): React.JSX.Element {
 
       <ol
         className={dropAt === schedule.items.length ? 'schedule-list drop-end' : 'schedule-list'}
-        aria-label="Urutan ibadah"
+        aria-label={t('Urutan ibadah')}
         onDragOver={(e) => onDragOver(e, schedule.items.length)}
         onDragLeave={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDropAt(null)
@@ -163,49 +208,59 @@ export function SchedulePanel(props: SchedulePanelProps): React.JSX.Element {
               onClick={() => open(index)}
               onDoubleClick={() => item.kind === 'text' && onEditText(index)}
               onKeyDown={(e) => onRowKey(e, index)}
-              title={`${SCHEDULE_KIND_LABELS[item.kind]}: ${item.title}`}
+              title={`${scheduleKindLabel(item.kind)}: ${item.title}`}
             >
-              <span className={`kind-mark kind-${item.kind}`} aria-label={SCHEDULE_KIND_LABELS[item.kind]}>
-                {KIND_MARK[item.kind]}
+              <span className={`kind-mark kind-${item.kind}`} aria-label={scheduleKindLabel(item.kind)}>
+                <KindIcon kind={item.kind} />
               </span>
               <span className="schedule-title">{item.title}</span>
-              {item.uid === liveUid && <span className="live-dot" aria-label="sedang tampil" />}
+              {item.uid === liveUid && <span className="live-dot" aria-label={t('sedang tampil')} />}
             </button>
           </li>
         ))}
         {schedule.items.length === 0 && (
           <li className="schedule-empty">
-            Seret lagu, ayat, atau media ke sini. Atau buka item di Preview lalu tekan <kbd>Ctrl+T</kbd>.
+            {t('Seret lagu, ayat, atau media ke sini, atau buka item di Preview lalu tekan')} <kbd>Ctrl+T</kbd>.
           </li>
         )}
       </ol>
 
       <div className="schedule-actions">
-        <button type="button" className="btn" onClick={onNewText} title="Slide teks untuk pengumuman">
-          + Teks
+        <button type="button" className="btn btn-sm" onClick={onNewText} title={t('Slide teks untuk pengumuman')}>
+          <PlusIcon />
+          {t('Teks')}
         </button>
-        <button
-          type="button"
-          className="btn"
-          disabled={selected === null}
-          onClick={() => selected !== null && actions.duplicate(selected)}
-          title="Duplikat (Ctrl+D)"
-        >
-          Duplikat
-        </button>
+        <span className="spacer" />
         {selected !== null && schedule.items[selected]?.kind === 'text' && (
-          <button type="button" className="btn" onClick={() => onEditText(selected)}>
-            Ubah
+          <button
+            type="button"
+            className="btn btn-sm icon-only"
+            onClick={() => onEditText(selected)}
+            title={t('Ubah slide teks')}
+          >
+            <EditIcon />
+            <span className="sr-only">{t('Ubah')}</span>
           </button>
         )}
         <button
           type="button"
-          className="btn"
+          className="btn btn-sm icon-only"
+          disabled={selected === null}
+          onClick={() => selected !== null && actions.duplicate(selected)}
+          title={t('Duplikat (Ctrl+D)')}
+        >
+          <CopyIcon />
+          <span className="sr-only">{t('Duplikat')}</span>
+        </button>
+        <button
+          type="button"
+          className="btn btn-sm btn-danger icon-only"
           disabled={selected === null}
           onClick={() => selected !== null && actions.remove(selected)}
-          title="Hapus dari schedule (Delete)"
+          title={t('Hapus dari schedule (Delete)')}
         >
-          Hapus
+          <TrashIcon />
+          <span className="sr-only">{t('Hapus')}</span>
         </button>
       </div>
     </div>

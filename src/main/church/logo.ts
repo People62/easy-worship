@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { isLogoFileName } from '@shared/settings'
+import { t } from '@shared/i18n'
 
 export const LOGO_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'] as const
 const MAX_LOGO_BYTES = 10 * 1024 * 1024
@@ -19,10 +20,10 @@ export function logoUrl(fileName: string | null): string | null {
 export async function importLogo(sourcePath: string, userDataDir: string, now = Date.now()): Promise<string> {
   const ext = extname(sourcePath).slice(1).toLowerCase()
   if (!(LOGO_EXTENSIONS as readonly string[]).includes(ext)) {
-    throw new Error(`Format logo tidak didukung: .${ext}. Pakai PNG, JPG, WEBP, GIF, atau SVG.`)
+    throw new Error(t('Format logo tidak didukung: .{ext}. Pakai PNG, JPG, WEBP, GIF, atau SVG.', { ext }))
   }
   const info = await stat(sourcePath)
-  if (info.size > MAX_LOGO_BYTES) throw new Error('File logo terlalu besar (maksimal 10 MB).')
+  if (info.size > MAX_LOGO_BYTES) throw new Error(t('File logo terlalu besar (maksimal 10 MB).'))
 
   const dir = churchDir(userDataDir)
   await mkdir(dir, { recursive: true })

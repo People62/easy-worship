@@ -1,4 +1,5 @@
 import type { DisplayInfo } from './ipc'
+import { t } from './i18n'
 
 export type OutputStatus =
   | { state: 'fullscreen'; display: DisplayInfo }
@@ -27,10 +28,13 @@ export function chooseOutput(displays: DisplayInfo[], choice: OutputChoice): Out
 export function describeOutput(status: OutputStatus): string {
   switch (status.state) {
     case 'fullscreen':
-      return `Output: ${status.display.label} · ${status.display.width}×${status.display.height}`
+      return t('Output: {display} · {size}', {
+        display: status.display.label,
+        size: `${status.display.width}×${status.display.height}`
+      })
     case 'windowed':
-      return 'Output: mode jendela (uji)'
+      return t('Output: mode jendela (uji)')
     case 'none':
-      return status.reason === 'output-off' ? 'Output: mati' : 'Output: tidak ada layar HDMI'
+      return status.reason === 'output-off' ? t('Output: mati') : t('Output: tidak ada layar HDMI')
   }
 }

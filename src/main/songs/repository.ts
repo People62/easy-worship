@@ -1,5 +1,6 @@
 import type Database from 'better-sqlite3'
 import { songFirstLine, type SectionKind, type Song, type SongInput, type SongSummary } from '@shared/songs'
+import { t } from '@shared/i18n'
 
 const LIST_LIMIT = 200
 
@@ -80,7 +81,7 @@ export class SongRepository {
            WHERE id = ?`
         )
         .run(input.title, input.author, input.copyright, input.ccli, input.keywords, id)
-      if (result.changes === 0) throw new Error('Lagu tidak ditemukan. Mungkin sudah dihapus.')
+      if (result.changes === 0) throw new Error(t('Lagu tidak ditemukan. Mungkin sudah dihapus.'))
       this.db.prepare('DELETE FROM song_sections WHERE song_id = ?').run(id)
       this.writeSections(id, input)
     })()

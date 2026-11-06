@@ -2,6 +2,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { clampLayout, DEFAULT_SETTINGS, type AppSettings, type SettingsPatch } from '@shared/settings'
 
 type Layout = AppSettings['layout']
+
+// Panel sizes are saved in pixels at the base font size (15 px). The root
+// font grows on wide screens, so the panels grow with it: a 260 px schedule
+// on the laptop is about 310 px on a 2560 px monitor.
+export const BASE_FONT_PX = 15
+
+function uiScale(): number {
+  const px = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  return Number.isFinite(px) && px > 0 ? px / BASE_FONT_PX : 1
+}
+
+export function toRem(basePx: number): string {
+  return `${(basePx / BASE_FONT_PX).toFixed(3)}rem`
+}
 type Key = keyof Layout
 
 export interface LayoutSplitter {
@@ -55,9 +69,9 @@ export function useLayout(
 
   return {
     layout,
-    schedule: make('scheduleWidth', (start, delta) => start + delta),
+    schedule: make('scheduleWidth', (start, delta) => start + delta / uiScale()),
     preview: make('previewShare', (start, delta, width) => (width > 0 ? start + delta / width : start)),
     // The library is below its divider: dragging up makes it taller.
-    library: make('libraryHeight', (start, delta) => start - delta)
+    library: make('libraryHeight', (start, delta) => start - delta / uiScale())
   }
 }

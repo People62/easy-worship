@@ -8,6 +8,7 @@ import { validateSongInput } from '@shared/songs'
 import { validateThemeInput } from '@shared/theme'
 import type { AppSettings } from '@shared/settings'
 import { formatVersionLabel } from '@shared/version'
+import { setLanguage, t } from '@shared/i18n'
 import { SCHEDULE_EXTENSION, scheduleNameFromPath, validateScheduleItems } from '@shared/schedule'
 import { readBibleFile } from './bible/importers'
 import { BibleRepository } from './bible/repository'
@@ -77,12 +78,12 @@ function createOperatorWindow(): BrowserWindow {
   window.webContents.on('will-prevent-unload', (event) => {
     const choice = dialog.showMessageBoxSync(window, {
       type: 'warning',
-      buttons: ['Tutup tanpa menyimpan', 'Batal'],
+      buttons: [t('Tutup tanpa menyimpan'), t('Batal')],
       defaultId: 1,
       cancelId: 1,
-      title: 'Schedule belum disimpan',
-      message: 'Schedule belum disimpan. Tutup aplikasi?',
-      detail: 'Perubahan pada schedule akan hilang.'
+      title: t('Schedule belum disimpan'),
+      message: t('Schedule belum disimpan. Tutup aplikasi?'),
+      detail: t('Perubahan pada schedule akan hilang.')
     })
     if (choice === 0) event.preventDefault()
   })
@@ -103,21 +104,21 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
   const songRepository = db ? new SongRepository(db) : null
   const songs = (): SongRepository => {
     if (!songRepository)
-      throw new Error('Database tidak bisa dibuka, jadi lagu tidak tersedia. Lihat Pengaturan → Tentang.')
+      throw new Error(t('Database tidak bisa dibuka, jadi lagu tidak tersedia. Lihat Pengaturan → Tentang.'))
     return songRepository
   }
   const songId = (id: unknown): number => {
-    if (!Number.isInteger(id) || (id as number) < 1) throw new Error('Nomor lagu tidak valid.')
+    if (!Number.isInteger(id) || (id as number) < 1) throw new Error(t('Nomor lagu tidak valid.'))
     return id as number
   }
   const bibleRepository = db ? new BibleRepository(db) : null
   const bible = (): BibleRepository => {
     if (!bibleRepository)
-      throw new Error('Database tidak bisa dibuka, jadi Alkitab tidak tersedia. Lihat Pengaturan → Tentang.')
+      throw new Error(t('Database tidak bisa dibuka, jadi Alkitab tidak tersedia. Lihat Pengaturan → Tentang.'))
     return bibleRepository
   }
   const versionId = (id: unknown): number => {
-    if (!Number.isInteger(id) || (id as number) < 1) throw new Error('Terjemahan tidak valid.')
+    if (!Number.isInteger(id) || (id as number) < 1) throw new Error(t('Terjemahan tidak valid.'))
     return id as number
   }
   const versionsChanged = (): void => broadcast('bible:versions-changed', bible().listVersions())
@@ -125,15 +126,16 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
   const mediaLibrary = db ? new MediaLibrary(db, userData) : null
   const themeRepository = db ? new ThemeRepository(db, (id) => mediaLibrary?.get(id) ?? null) : null
   const media = (): MediaLibrary => {
-    if (!mediaLibrary) throw new Error('Database tidak bisa dibuka, jadi media tidak tersedia.')
+    if (!mediaLibrary) throw new Error(t('Database tidak bisa dibuka, jadi media tidak tersedia.'))
     return mediaLibrary
   }
   const themes = (): ThemeRepository => {
-    if (!themeRepository) throw new Error('Database tidak bisa dibuka, jadi tema tidak tersedia.')
+    if (!themeRepository) throw new Error(t('Database tidak bisa dibuka, jadi tema tidak tersedia.'))
     return themeRepository
   }
-  const recordId = (id: unknown, what: string): number => {
-    if (!Number.isInteger(id) || (id as number) < 1) throw new Error(`${what} tidak valid.`)
+  const recordId = (id: unknown, what: 'Media' | 'Tema'): number => {
+    if (!Number.isInteger(id) || (id as number) < 1)
+      throw new Error(what === 'Media' ? t('Media tidak valid.') : t('Tema tidak valid.'))
     return id as number
   }
   const mediaChanged = (): void => {
@@ -146,7 +148,9 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
   // The renderer may only save over a file the operator picked in a dialog
   // or that is in the recent list, never a path it made up.
   const knownSchedulePaths = new Set<string>()
-  const scheduleFilters = [{ name: 'Schedule El-Gibbor Worship', extensions: [SCHEDULE_EXTENSION] }]
+  const scheduleFilters = (): { name: string; extensions: string[] }[] => [
+    { name: t('Schedule El-Gibbor Worship'), extensions: [SCHEDULE_EXTENSION] }
+  ]
   const remember = (path: string): void => {
     knownSchedulePaths.add(path)
     recent.add(path)
@@ -203,9 +207,9 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'output:get-status': () => output.getStatus(),
     'church:choose-logo': async () => {
       const options = {
-        title: 'Pilih logo gereja',
+        title: t('Pilih logo gereja'),
         properties: ['openFile' as const],
-        filters: [{ name: 'Gambar', extensions: [...LOGO_EXTENSIONS] }]
+        filters: [{ name: t('Gambar'), extensions: [...LOGO_EXTENSIONS] }]
       }
       const result = operatorWindow
         ? await dialog.showOpenDialog(operatorWindow, options)
@@ -238,9 +242,9 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'bible:list-versions': () => bible().listVersions(),
     'bible:import': async () => {
       const options = {
-        title: 'Impor Alkitab',
+        title: t('Impor Alkitab'),
         properties: ['openFile' as const],
-        filters: [{ name: 'Alkitab (Zefania, OSIS, OpenSong)', extensions: ['xml', 'osis', 'zefania'] }]
+        filters: [{ name: t('Alkitab (Zefania, OSIS, OpenSong)'), extensions: ['xml', 'osis', 'zefania'] }]
       }
       const result = operatorWindow
         ? await dialog.showOpenDialog(operatorWindow, options)
@@ -254,7 +258,7 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       return { version, skippedBooks: imported.skippedBooks }
     },
     'bible:rename-version': (id, name, abbreviation) => {
-      if (typeof name !== 'string' || typeof abbreviation !== 'string') throw new Error('Nama tidak valid.')
+      if (typeof name !== 'string' || typeof abbreviation !== 'string') throw new Error(t('Nama tidak valid.'))
       const version = bible().renameVersion(versionId(id), name, abbreviation)
       versionsChanged()
       return version
@@ -269,12 +273,12 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'media:list': () => media().list(),
     'media:import': async () => {
       const options = {
-        title: 'Impor gambar atau video',
+        title: t('Impor gambar atau video'),
         properties: ['openFile' as const, 'multiSelections' as const],
         filters: [
-          { name: 'Gambar dan video', extensions: [...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS] },
-          { name: 'Gambar', extensions: [...IMAGE_EXTENSIONS] },
-          { name: 'Video', extensions: [...VIDEO_EXTENSIONS] }
+          { name: t('Gambar dan video'), extensions: [...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS] },
+          { name: t('Gambar'), extensions: [...IMAGE_EXTENSIONS] },
+          { name: t('Video'), extensions: [...VIDEO_EXTENSIONS] }
         ]
       }
       const result = operatorWindow
@@ -291,7 +295,7 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       return item
     },
     'media:rename': (id, name) => {
-      if (typeof name !== 'string') throw new Error('Nama tidak valid.')
+      if (typeof name !== 'string') throw new Error(t('Nama tidak valid.'))
       const item = media().rename(recordId(id, 'Media'), name)
       mediaChanged()
       return item
@@ -322,7 +326,7 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     },
     'schedule:list-recent': () => recent.list(),
     'schedule:open': async () => {
-      const options = { title: 'Buka schedule', properties: ['openFile' as const], filters: scheduleFilters }
+      const options = { title: t('Buka schedule'), properties: ['openFile' as const], filters: scheduleFilters() }
       const result = operatorWindow
         ? await dialog.showOpenDialog(operatorWindow, options)
         : await dialog.showOpenDialog(options)
@@ -331,7 +335,7 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       return openSchedule(file)
     },
     'schedule:open-recent': (path) => {
-      if (typeof path !== 'string' || !recent.has(path)) throw new Error('Schedule tidak ada di daftar terakhir.')
+      if (typeof path !== 'string' || !recent.has(path)) throw new Error(t('Schedule tidak ada di daftar terakhir.'))
       return openSchedule(path)
     },
     'schedule:save': async (input, path) => {
@@ -340,9 +344,9 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
       if (!target) {
         const date = new Date().toISOString().slice(0, 10)
         const options = {
-          title: 'Simpan schedule',
-          defaultPath: join(app.getPath('documents'), `Ibadah ${date}.${SCHEDULE_EXTENSION}`),
-          filters: scheduleFilters
+          title: t('Simpan schedule'),
+          defaultPath: join(app.getPath('documents'), `${t('Ibadah {date}', { date })}.${SCHEDULE_EXTENSION}`),
+          filters: scheduleFilters()
         }
         const result = operatorWindow
           ? await dialog.showSaveDialog(operatorWindow, options)
@@ -356,12 +360,17 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     },
     'bible:get-passage': (id, query) => {
       const version = bible().getVersion(versionId(id))
-      if (!version) throw new Error('Terjemahan tidak ditemukan. Mungkin sudah dihapus.')
+      if (!version) throw new Error(t('Terjemahan tidak ditemukan. Mungkin sudah dihapus.'))
       const parsed = parseReference(typeof query === 'string' ? query.slice(0, 100) : '')
       if (!parsed.ok) throw new Error(parsed.error)
       const verses = bible().getPassage(version.id, parsed.reference)
       if (verses.length === 0) {
-        throw new Error(`${formatReference(parsed.reference)} tidak ada di ${version.abbreviation}.`)
+        throw new Error(
+          t('{reference} tidak ada di {abbr}.', {
+            reference: formatReference(parsed.reference),
+            abbr: version.abbreviation
+          })
+        )
       }
       return {
         versionId: version.id,
@@ -395,11 +404,13 @@ app.whenReady().then(() => {
     onStatus: (status) => broadcast('output:status-changed', status)
   })
 
+  setLanguage(settings.get().general.language)
   applyNativeTheme(settings.get())
   live.setLogo(logoUrl(settings.get().church.logoFile))
 
   let previous = settings.get()
   settings.onChange((next) => {
+    setLanguage(next.general.language)
     applyNativeTheme(next)
     live.setLogo(logoUrl(next.church.logoFile))
     if (JSON.stringify(next.output) !== JSON.stringify(previous.output)) output.reconcile()

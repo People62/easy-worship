@@ -10,6 +10,7 @@ describe('normalizeSettings', () => {
 
   it('keeps valid values and normalizes colors', () => {
     const result = normalizeSettings({
+      general: { language: 'en' },
       appearance: { mode: 'light', primary: '#2563eb' },
       output: { displayId: 7, windowed: true },
       church: { logoFile: 'logo.png' },
@@ -19,6 +20,7 @@ describe('normalizeSettings', () => {
       layout: { scheduleWidth: 300, previewShare: 0.6, libraryHeight: 240 }
     })
     expect(result).toEqual({
+      general: { language: 'en' },
       appearance: { mode: 'light', primary: '#2563EB' },
       output: { displayId: 7, windowed: true },
       church: { logoFile: 'logo.png' },
@@ -38,7 +40,16 @@ describe('normalizeSettings', () => {
 
   it('drops unknown keys', () => {
     const result = normalizeSettings({ appearance: { mode: 'dark', extra: true }, other: 1 })
-    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs', 'bible', 'themes', 'layout'])
+    expect(Object.keys(result)).toEqual([
+      'general',
+      'appearance',
+      'output',
+      'church',
+      'songs',
+      'bible',
+      'themes',
+      'layout'
+    ])
     expect(Object.keys(result.appearance)).toEqual(['mode', 'primary'])
   })
 })
@@ -118,5 +129,14 @@ describe('panel layout', () => {
   it('repairs damaged stored sizes', () => {
     const settings = normalizeSettings({ layout: { scheduleWidth: 'wide', libraryHeight: 50 } })
     expect(settings.layout).toEqual({ scheduleWidth: 260, previewShare: 0.5, libraryHeight: 160 })
+  })
+})
+
+describe('language', () => {
+  it('defaults to Indonesian and accepts English', () => {
+    expect(DEFAULT_SETTINGS.general.language).toBe('id')
+    expect(applySettingsPatch(DEFAULT_SETTINGS, { general: { language: 'en' } }).general.language).toBe('en')
+    expect(normalizeSettings({ general: { language: 'fr' } }).general.language).toBe('id')
+    expect(() => applySettingsPatch(DEFAULT_SETTINGS, { general: { language: 'fr' as never } })).toThrow()
   })
 })

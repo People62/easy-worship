@@ -32,4 +32,18 @@ describe('themeVariables', () => {
       expect(contrastRatio(vars['--muted'], vars['--surface'])).toBeGreaterThanOrEqual(4.5)
     }
   })
+
+  it('keeps status text readable on panels and raised areas', () => {
+    for (const mode of ['dark', 'light'] as const) {
+      const vars = themeVariables(mode, '#D4A017')
+      for (const text of ['--fg', '--muted', '--danger', '--success', '--warning']) {
+        for (const background of ['--surface', '--surface-2', '--bg']) {
+          expect(
+            contrastRatio(vars[text], vars[background]),
+            `${mode} ${text} on ${background}`
+          ).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+  })
 })

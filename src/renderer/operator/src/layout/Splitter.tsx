@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { t } from '@shared/i18n'
 
 interface SplitterProps {
   // "columns" sits between two columns and drags left/right.
@@ -27,7 +28,7 @@ export function Splitter(props: SplitterProps & { onReset: () => void }): React.
       aria-label={label}
       aria-orientation={direction === 'columns' ? 'vertical' : 'horizontal'}
       className={`splitter splitter-${direction} ${className ?? ''}`}
-      title={`${label}. Seret untuk mengubah ukuran, klik dua kali untuk ukuran awal.`}
+      title={t('{label}. Seret untuk mengubah ukuran, klik dua kali untuk ukuran awal.', { label })}
       onPointerDown={(event) => {
         if (event.button !== 0) return
         event.currentTarget.setPointerCapture(event.pointerId)

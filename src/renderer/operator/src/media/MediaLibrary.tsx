@@ -3,6 +3,7 @@ import type { MediaItem } from '@shared/ipc'
 import { errorMessage } from '../errors'
 import { dragNewItem } from '../schedule/drag'
 import { failedThumbnails } from './useMedia'
+import { t } from '@shared/i18n'
 
 interface MediaLibraryProps {
   items: MediaItem[] | null
@@ -46,38 +47,44 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
       if (!result) return
       const failed = result.failed.map((f) => `${f.file}: ${f.error}`).join(' · ')
       setMessage({
-        text: `${result.imported.length} file diimpor.${failed ? ` Gagal: ${failed}` : ''}`,
+        text:
+          t('{n} file diimpor.', { n: result.imported.length }) +
+          (failed ? ' ' + t('Gagal: {error}', { error: failed }) : ''),
         error: result.failed.length > 0
       })
     })
 
-  if (items === null) return <p className="empty">Memuat…</p>
+  if (items === null) return <p className="empty">{t('Memuat…')}</p>
 
   return (
     <div className="media-library">
       <div className="library-toolbar">
         <button type="button" className="btn btn-primary" onClick={() => void importFiles()}>
-          + Impor gambar/video…
+          {t('+ Impor gambar/video…')}
         </button>
         <button type="button" className="btn" disabled={!selected} onClick={() => setRenaming(selected)}>
-          Ganti nama
+          {t('Ganti nama')}
         </button>
         <button
           type="button"
-          className="btn"
+          className="btn btn-danger"
           disabled={!selected}
           onClick={() => {
             if (
               selected &&
-              window.confirm(`Hapus "${selected.name}"? Tema yang memakai media ini akan berlatar hitam.`)
+              window.confirm(
+                t('Hapus "{name}"? Tema yang memakai media ini akan berlatar hitam.', { name: selected.name })
+              )
             ) {
               void run(() => window.api.media.delete(selected.id))
             }
           }}
         >
-          Hapus
+          {t('Hapus')}
         </button>
-        <span className="muted media-hint">Gambar: JPG, PNG, WEBP · Video: MP4 (H.264), WEBM · maksimal 1080p</span>
+        <span className="muted media-hint">
+          {t('Gambar: JPG, PNG, WEBP · Video: MP4 (H.264), WEBM · maksimal 1080p')}
+        </span>
       </div>
 
       {message && <p className={message.error ? 'field-error' : 'notice'}>{message.text}</p>}
@@ -90,9 +97,9 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
       )}
 
       {items.length === 0 ? (
-        <p className="empty">Belum ada media. Impor gambar atau video untuk dipakai sebagai latar.</p>
+        <p className="empty">{t('Belum ada media. Impor gambar atau video untuk dipakai sebagai latar.')}</p>
       ) : (
-        <ul className="media-grid" aria-label="Media">
+        <ul className="media-grid" aria-label={t('Media')}>
           {items.map((item) => (
             <li key={item.id}>
               <button
@@ -101,7 +108,7 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
                 draggable
                 onDragStart={(e) => dragNewItem(e, { kind: 'media', mediaId: item.id, title: item.name })}
                 onClick={() => onSelect(item)}
-                title="Klik untuk Preview, seret ke Schedule"
+                title={t('Klik untuk Preview, seret ke Schedule')}
               >
                 <span className="media-thumb">
                   {item.thumbnailUrl ? (
@@ -115,7 +122,7 @@ export function MediaLibrary({ items, selectedId, onSelect }: MediaLibraryProps)
                 <span className="media-meta">
                   {item.width && item.height ? `${item.width}×${item.height} · ` : ''}
                   {formatSize(item.sizeBytes)}
-                  {isTooLarge(item) && <span className="warn-text"> · di atas 1080p</span>}
+                  {isTooLarge(item) && <span className="warn-text"> {t('· di atas 1080p')}</span>}
                 </span>
               </button>
             </li>
@@ -150,7 +157,7 @@ function RenameRow({
         className="search"
         value={name}
         autoFocus
-        aria-label="Nama media"
+        aria-label={t('Nama media')}
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => {
           e.stopPropagation()
@@ -159,10 +166,10 @@ function RenameRow({
         }}
       />
       <button type="button" className="btn btn-primary" onClick={() => void save()}>
-        Simpan
+        {t('Simpan')}
       </button>
       <button type="button" className="btn" onClick={onDone}>
-        Batal
+        {t('Batal')}
       </button>
     </div>
   )

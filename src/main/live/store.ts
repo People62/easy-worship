@@ -13,6 +13,7 @@ import {
   type Overlay,
   type Slide
 } from '@shared/live'
+import { t } from '@shared/i18n'
 
 type Listener = (state: LiveState) => void
 
@@ -32,7 +33,7 @@ export class LiveStore {
   }
 
   showDeck(deck: LiveDeck, index: number): LiveState {
-    if (!Array.isArray(deck?.slides) || deck.slides.length > MAX_DECK_SLIDES) throw new Error('Item terlalu besar.')
+    if (!Array.isArray(deck?.slides) || deck.slides.length > MAX_DECK_SLIDES) throw new Error(t('Item terlalu besar.'))
     const source = typeof deck.source === 'string' ? deck.source.slice(0, 64) : undefined
     return this.set(
       showDeck(

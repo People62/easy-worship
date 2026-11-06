@@ -4,7 +4,7 @@ import type { Background, Slide, SlideStyle } from '@shared/live'
 import {
   FONT_CHOICES,
   LIMITS,
-  THEME_KIND_LABELS,
+  themeKindLabel,
   THEME_KINDS,
   type Theme,
   type ThemeInput,
@@ -12,6 +12,7 @@ import {
 } from '@shared/theme'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
 import { errorMessage } from '../errors'
+import { t } from '@shared/i18n'
 
 interface ThemeEditorDialogProps {
   // An existing theme to edit, or the starting point for a new one.
@@ -97,13 +98,13 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
   return (
     <dialog ref={dialogRef} className="dialog dialog-wide" onClose={onClose} aria-labelledby="theme-editor-title">
       <header className="dialog-head">
-        <h2 id="theme-editor-title">{initial.id ? 'Ubah tema' : 'Tema baru'}</h2>
+        <h2 id="theme-editor-title">{initial.id ? t('Ubah tema') : t('Tema baru')}</h2>
         <div className="row">
           <button type="button" className="btn" onClick={() => dialogRef.current?.close()}>
-            Batal
+            {t('Batal')}
           </button>
           <button type="button" className="btn btn-primary" onClick={() => void save()}>
-            Simpan
+            {t('Simpan')}
           </button>
         </div>
       </header>
@@ -113,26 +114,26 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           <div className="slide-frame">
             <SlideRenderer slide={{ ...SAMPLES[kind], style }} style={style} overlay="none" logoUrl={null} playVideo />
           </div>
-          <p className="hint">Pratinjau. Di TV tampil sama persis.</p>
+          <p className="hint">{t('Pratinjau. Di TV tampil sama persis.')}</p>
         </div>
 
         <div className="theme-fields">
           <label className="field field-wide">
-            <span>Nama tema *</span>
+            <span>{t('Nama tema *')}</span>
             <input value={name} onChange={(e) => setName(e.target.value)} maxLength={100} autoFocus />
           </label>
           <label className="field">
-            <span>Dipakai untuk</span>
+            <span>{t('Dipakai untuk')}</span>
             <select className="select" value={kind} onChange={(e) => setKind(e.target.value as ThemeKind)}>
               {THEME_KINDS.map((k) => (
                 <option key={k} value={k}>
-                  {THEME_KIND_LABELS[k]}
+                  {themeKindLabel(k)}
                 </option>
               ))}
             </select>
           </label>
           <label className="field">
-            <span>Font</span>
+            <span>{t('Font')}</span>
             <select className="select" value={style.fontFamily} onChange={(e) => set('fontFamily', e.target.value)}>
               {!fontKnown && <option value={style.fontFamily}>{style.fontFamily}</option>}
               {FONT_CHOICES.map((f) => (
@@ -144,7 +145,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           </label>
 
           <NumberField
-            label="Ukuran huruf"
+            label={t('Ukuran huruf')}
             value={style.fontSize}
             min={LIMITS.fontSize.min}
             max={LIMITS.fontSize.max}
@@ -152,7 +153,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
             onChange={(v) => set('fontSize', v)}
           />
           <NumberField
-            label="Jarak baris"
+            label={t('Jarak baris')}
             value={style.lineHeight}
             min={LIMITS.lineHeight.min}
             max={LIMITS.lineHeight.max}
@@ -161,12 +162,12 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           />
 
           <label className="field">
-            <span>Warna teks</span>
+            <span>{t('Warna teks')}</span>
             <input type="color" value={style.color.toLowerCase()} onChange={(e) => set('color', e.target.value)} />
           </label>
           <div className="field">
-            <span>Perataan</span>
-            <div className="segmented" role="radiogroup" aria-label="Perataan">
+            <span>{t('Perataan')}</span>
+            <div className="segmented" role="radiogroup" aria-label={t('Perataan')}>
               {(['left', 'center', 'right'] as const).map((align) => (
                 <button
                   key={align}
@@ -176,7 +177,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
                   className={style.align === align ? 'btn btn-active' : 'btn'}
                   onClick={() => set('align', align)}
                 >
-                  {align === 'left' ? 'Kiri' : align === 'center' ? 'Tengah' : 'Kanan'}
+                  {align === 'left' ? t('Kiri') : align === 'center' ? t('Tengah') : t('Kanan')}
                 </button>
               ))}
             </div>
@@ -185,18 +186,18 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           <label className="checkbox">
             <input type="checkbox" checked={style.uppercase} onChange={(e) => set('uppercase', e.target.checked)} />
             <span>
-              <strong>Huruf kapital semua</strong>
+              <strong>{t('Huruf kapital semua')}</strong>
             </span>
           </label>
           <label className="checkbox">
             <input type="checkbox" checked={style.shadow} onChange={(e) => set('shadow', e.target.checked)} />
             <span>
-              <strong>Bayangan teks</strong>
+              <strong>{t('Bayangan teks')}</strong>
             </span>
           </label>
 
           <NumberField
-            label="Garis tepi teks"
+            label={t('Garis tepi teks')}
             value={style.outlineWidth}
             min={LIMITS.outlineWidth.min}
             max={LIMITS.outlineWidth.max}
@@ -204,7 +205,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
             onChange={(v) => set('outlineWidth', v)}
           />
           <label className="field">
-            <span>Warna garis tepi</span>
+            <span>{t('Warna garis tepi')}</span>
             <input
               type="color"
               value={style.outlineColor.toLowerCase()}
@@ -214,7 +215,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           </label>
 
           <NumberField
-            label="Margin"
+            label={t('Margin')}
             value={style.margin}
             min={LIMITS.margin.min}
             max={LIMITS.margin.max}
@@ -223,23 +224,23 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
           />
 
           <label className="field field-wide">
-            <span>Latar</span>
+            <span>{t('Latar')}</span>
             <select
               className="select"
               value={style.background.kind === 'color' ? 'color' : String(style.background.mediaId)}
               onChange={(e) => setBackground(e.target.value)}
             >
-              <option value="color">Warna polos</option>
+              <option value="color">{t('Warna polos')}</option>
               {media.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.kind === 'video' ? 'Video' : 'Gambar'}: {m.name}
+                  {m.kind === 'video' ? t('Video') : t('Gambar')}: {m.name}
                 </option>
               ))}
             </select>
           </label>
           {style.background.kind === 'color' ? (
             <label className="field">
-              <span>Warna latar</span>
+              <span>{t('Warna latar')}</span>
               <input
                 type="color"
                 value={style.background.color.toLowerCase()}
@@ -248,7 +249,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
             </label>
           ) : (
             <NumberField
-              label="Gelapkan latar"
+              label={t('Gelapkan latar')}
               value={style.backgroundDim}
               min={LIMITS.backgroundDim.min}
               max={LIMITS.backgroundDim.max}
@@ -258,7 +259,7 @@ export function ThemeEditorDialog({ initial, media, onSaved, onClose }: ThemeEdi
             />
           )}
           {media.length === 0 && (
-            <p className="hint field-wide">Untuk latar gambar atau video, impor dulu di tab Media.</p>
+            <p className="hint field-wide">{t('Untuk latar gambar atau video, impor dulu di tab Media.')}</p>
           )}
         </div>
 

@@ -1,9 +1,14 @@
 import { isHexColor, normalizeHex } from './color'
+import { DEFAULT_LANGUAGE, isLanguage, t, type Language } from './i18n'
 import { DEFAULT_LINES_PER_SLIDE, MAX_LINES_PER_SLIDE, MIN_LINES_PER_SLIDE } from './slides'
 
 export type ThemeMode = 'dark' | 'light' | 'system'
 
 export interface AppSettings {
+  general: {
+    // Language of the operator window and messages. Slides are not translated.
+    language: Language
+  }
   appearance: {
     mode: ThemeMode
     primary: string
@@ -45,6 +50,7 @@ export interface AppSettings {
 }
 
 export type SettingsPatch = {
+  general?: Partial<AppSettings['general']>
   appearance?: Partial<AppSettings['appearance']>
   output?: Partial<AppSettings['output']>
   church?: Partial<AppSettings['church']>
@@ -57,6 +63,7 @@ export type SettingsPatch = {
 export const DEFAULT_PRIMARY = '#D4A017'
 
 export const DEFAULT_SETTINGS: AppSettings = {
+  general: { language: DEFAULT_LANGUAGE },
   appearance: { mode: 'dark', primary: DEFAULT_PRIMARY },
   output: { displayId: null, windowed: false },
   church: { logoFile: null },
@@ -126,6 +133,7 @@ function asRecord(value: unknown): Record<string, unknown> {
 // settings row can never stop the app from starting.
 export function normalizeSettings(raw: unknown): AppSettings {
   const root = asRecord(raw)
+  const general = asRecord(root.general)
   const appearance = asRecord(root.appearance)
   const output = asRecord(root.output)
   const church = asRecord(root.church)
@@ -135,6 +143,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const layout = asRecord(root.layout)
 
   return {
+    general: {
+      language: isLanguage(general.language) ? general.language : DEFAULT_SETTINGS.general.language
+    },
     appearance: {
       mode: isThemeMode(appearance.mode) ? appearance.mode : DEFAULT_SETTINGS.appearance.mode,
       primary: isHexColor(appearance.primary) ? normalizeHex(appearance.primary) : DEFAULT_SETTINGS.appearance.primary
@@ -170,6 +181,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
 // rejected so the UI can show the mistake instead of silently resetting.
 export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): AppSettings {
   const next: AppSettings = {
+    general: { ...current.general },
     appearance: { ...current.appearance },
     output: { ...current.output },
     church: { ...current.church },
@@ -179,6 +191,10 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
     layout: { ...current.layout }
   }
 
+  if (patch.general?.language !== undefined) {
+    if (!isLanguage(patch.general.language)) throw new Error(`Invalid language: ${String(patch.general.language)}`)
+    next.general.language = patch.general.language
+  }
   if (patch.appearance?.mode !== undefined) {
     if (!isThemeMode(patch.appearance.mode)) throw new Error(`Invalid theme mode: ${String(patch.appearance.mode)}`)
     next.appearance.mode = patch.appearance.mode
@@ -201,7 +217,7 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
   }
   if (patch.songs?.linesPerSlide !== undefined) {
     if (!isLinesPerSlide(patch.songs.linesPerSlide)) {
-      throw new Error(`Baris per slide harus ${MIN_LINES_PER_SLIDE}–${MAX_LINES_PER_SLIDE}.`)
+      throw new Error(t('Baris per slide harus {min}–{max}.', { min: MIN_LINES_PER_SLIDE, max: MAX_LINES_PER_SLIDE }))
     }
     next.songs.linesPerSlide = patch.songs.linesPerSlide
   }

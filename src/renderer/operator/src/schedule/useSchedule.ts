@@ -14,13 +14,14 @@ export interface ScheduleState {
   items: ScheduleItem[]
   // The file it was opened from or saved to, or null for a new schedule.
   path: string | null
-  name: string
+  name: string | null
   dirty: boolean
   // Tracked by uid so it stays on the same item when rows move.
   selectedUid: string | null
 }
 
-const EMPTY: ScheduleState = { items: [], path: null, name: 'Schedule baru', dirty: false, selectedUid: null }
+// name is null for a new schedule; the panel shows "Schedule baru" in the current language.
+const EMPTY: ScheduleState = { items: [], path: null, name: null, dirty: false, selectedUid: null }
 
 export function selectedIndex(state: ScheduleState): number | null {
   const index = state.items.findIndex((item) => item.uid === state.selectedUid)
