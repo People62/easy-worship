@@ -5,5 +5,5 @@ import { useLive } from '../../shared/useLive'
 export function Output(): React.JSX.Element | null {
   const live = useLive()
   if (!live) return null
-  return <SlideRenderer slide={live.slide} style={live.style} overlay={live.overlay} logoUrl={live.logoUrl} />
+  return <SlideRenderer slide={live.slide} style={live.style} overlay={live.overlay} logoUrl={live.logoUrl} playVideo />
 }
