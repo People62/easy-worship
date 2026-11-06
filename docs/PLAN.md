@@ -122,6 +122,18 @@ Catatan: ukuran panel yang bisa digeser dan diingat (PRD bagian 6) dipindah ke T
 
 **Selesai bila:** satu urutan ibadah lengkap bisa disusun dan dijalankan hanya dengan keyboard.
 
+### Tahap 6.5 · Perbaikan desain (S)
+
+Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua layar setelah semuanya berfungsi, memakai skill `design-system` (token, skala huruf dan jarak, spesifikasi komponen).
+
+**Catatan desain yang sudah ditemukan**
+
+- Di layar lebar (sekitar 2000 px), Preview dan Live terlalu besar sehingga banyak ruang kosong di bawahnya.
+- Panel Schedule lebar tetapi isinya sedikit.
+- Ukuran huruf terasa kecil dibanding luas layar.
+
+**Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
+
 ### Tahap 7 · Stabil dan rilis MVP (S)
 
 - [ ] Simpan otomatis + backup harian (simpan 7 terakhir).
