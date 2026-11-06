@@ -1,0 +1,38 @@
+.slide-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.slide-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+}
+
+.slide-text {
+  position: absolute;
+  inset: 80px 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-weight: 700;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.slide-logo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.slide-logo img {
+  max-width: 60%;
+  max-height: 60%;
+  object-fit: contain;
+}

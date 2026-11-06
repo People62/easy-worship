@@ -78,13 +78,22 @@ Catatan: ukuran panel yang bisa digeser dan diingat (PRD bagian 6) dipindah ke T
 
 ### Tahap 2 · Mesin tampilan dan output (B) — paling berisiko
 
-- [ ] Komponen **SlideRenderer**: teks, latar gambar/warna, huruf kapital, rasio 16:9, 1920×1080.
-- [ ] Jendela output layar penuh di monitor yang dipilih.
-- [ ] Deteksi monitor dicolok/dicabut (F-OT-02); output tidak pernah muncul di layar laptop.
-- [ ] Mode jendela untuk uji tanpa proyektor (F-OT-03).
-- [ ] Status Live di main process + tombol Black, Clear, Logo (logo GPdI dari Pengaturan).
+- [x] Komponen **SlideRenderer**: teks, latar warna, huruf kapital, rasio 16:9, 1920×1080. Latar gambar/video menyusul di Tahap 5.
+- [x] Jendela output layar penuh di monitor yang dipilih.
+- [x] Deteksi monitor dicolok/dicabut (F-OT-02); output tidak pernah muncul di layar laptop.
+- [x] Mode jendela untuk uji tanpa proyektor (F-OT-03).
+- [x] Status Live di main process + tombol Black, Clear, Logo (logo GPdI dari Pengaturan).
 
 **Selesai bila:** di laptop gereja, slide uji tampil di 3 TV, dan cabut-colok HDMI tidak membuat output pindah ke layar laptop.
+
+Cabut-colok HDMI sudah diuji dengan test otomatis (`src/main/output/manager.test.ts`). Uji di gereja tetap diperlukan:
+
+- [ ] Sambungkan HDMI. Status di kanan atas berubah menjadi "Output: … 1920×1080".
+- [ ] Ketik slide uji, tekan Enter: teks tampil di monitor pemantau dan ketiga TV.
+- [ ] F5 (Black), F6 (Clear), F7 (Logo), lalu Esc: TV mengikuti, dan layar laptop tetap menampilkan aplikasi.
+- [ ] Cabut HDMI saat slide tampil: slide tidak muncul di layar laptop; status menjadi "tidak ada layar HDMI".
+- [ ] Colok lagi: slide kembali tampil di TV tanpa perlu menekan apa pun.
+- [ ] Pilih logo GPdI di Pengaturan, tekan F7: logo tampil di TV.
 
 ### Tahap 3 · Lagu (B)
 
@@ -121,6 +130,18 @@ Catatan: ukuran panel yang bisa digeser dan diingat (PRD bagian 6) dipindah ke T
 - [ ] Ukuran panel bisa digeser dan diingat (dipindah dari Tahap 1).
 
 **Selesai bila:** satu urutan ibadah lengkap bisa disusun dan dijalankan hanya dengan keyboard.
+
+### Tahap 6.5 · Perbaikan desain (S)
+
+Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua layar setelah semuanya berfungsi, memakai skill `design-system` (token, skala huruf dan jarak, spesifikasi komponen).
+
+**Catatan desain yang sudah ditemukan**
+
+- Di layar lebar (sekitar 2000 px), Preview dan Live terlalu besar sehingga banyak ruang kosong di bawahnya.
+- Panel Schedule lebar tetapi isinya sedikit.
+- Ukuran huruf terasa kecil dibanding luas layar.
+
+**Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
 
 ### Tahap 7 · Stabil dan rilis MVP (S)
 

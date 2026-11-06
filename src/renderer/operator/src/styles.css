@@ -419,3 +419,124 @@ select {
 .about dd {
   margin: 0;
 }
+
+/* Phase 2: live controls, output status, test slide, logo */
+.btn kbd,
+.btn-primary kbd {
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 18%);
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.btn-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.output-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.output-status.warn {
+  background: rgb(234 88 12 / 18%);
+  color: #f97316;
+}
+
+.slide-frame {
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.test-slide {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.test-slide textarea {
+  resize: vertical;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font: inherit;
+  font-size: 14px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox input {
+  margin-top: 3px;
+  accent-color: var(--primary);
+}
+
+.checkbox > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hint-inline {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-preview {
+  display: grid;
+  place-items: center;
+  width: 160px;
+  height: 90px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #000;
+  color: #a8a29e;
+  font-size: 11px;
+  text-align: center;
+  padding: 6px;
+}
+
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

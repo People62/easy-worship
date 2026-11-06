@@ -18,7 +18,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          operator: resolve(__dirname, 'src/renderer/operator/index.html')
+          operator: resolve(__dirname, 'src/renderer/operator/index.html'),
+          output: resolve(__dirname, 'src/renderer/output/index.html')
         }
       }
     }

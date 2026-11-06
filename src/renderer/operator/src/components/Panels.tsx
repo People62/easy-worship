@@ -22,11 +22,6 @@ export function EmptyState({ children }: { children: React.ReactNode }): React.J
   return <p className="empty">{children}</p>
 }
 
-// A 16:9 frame that will hold the SlideRenderer in phase 2.
-export function SlideFrame({ children }: { children?: React.ReactNode }): React.JSX.Element {
-  return <div className="slide-frame">{children}</div>
-}
-
 const LIBRARY_TABS = [
   { id: 'songs', label: 'Lagu', placeholder: 'Cari judul atau lirik…', empty: 'Belum ada lagu. Tersedia di Tahap 3.' },
   { id: 'bible', label: 'Alkitab', placeholder: 'Contoh: yoh 3:16', empty: 'Belum ada Alkitab. Tersedia di Tahap 4.' },
