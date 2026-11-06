@@ -96,6 +96,18 @@ export const migrations: readonly Migration[] = [
       CREATE INDEX song_sections_song ON song_sections (song_id, position);
       CREATE INDEX songs_title ON songs (title COLLATE NOCASE);
     `
+  },
+  {
+    version: 3,
+    name: 'media details',
+    // path = file name inside the media folder; thumbnail = file name inside
+    // the thumbs folder. Both folders live in the app's user data folder.
+    up: `
+      ALTER TABLE media ADD COLUMN name TEXT NOT NULL DEFAULT '';
+      ALTER TABLE media ADD COLUMN width INTEGER;
+      ALTER TABLE media ADD COLUMN height INTEGER;
+      ALTER TABLE media ADD COLUMN size_bytes INTEGER NOT NULL DEFAULT 0;
+    `
   }
 ]
 
