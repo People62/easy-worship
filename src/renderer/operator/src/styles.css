@@ -1,11 +1,19 @@
+/* Theme variables (--bg, --surface, --primary, ...) are set on :root by
+   useAppearance. The values below are the dark defaults shown while loading. */
 :root {
-  --primary: #d4a017;
   --bg: #171412;
   --surface: #26211d;
+  --surface-2: #3a322b;
+  --border: #3a322b;
   --fg: #f5f0e6;
   --muted: #a8a29e;
+  --primary: #d4a017;
+  --primary-text: #d4a017;
+  --on-primary: #000000;
+  --radius: 8px;
   color-scheme: dark;
   font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
 }
 
 * {
@@ -18,31 +26,396 @@ body {
   color: var(--fg);
 }
 
-.splash {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
 }
 
-.splash h1 {
-  margin: 0;
-  font-size: 28px;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
-.splash dl {
+.loading {
   display: grid;
-  grid-template-columns: auto auto;
-  gap: 4px 16px;
-  padding: 16px 20px;
-  border-radius: 8px;
-  background: var(--surface);
+  place-items: center;
+  height: 100vh;
   color: var(--muted);
 }
 
-.splash dd {
+/* Layout */
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.6fr) minmax(320px, 1.6fr);
+  grid-template-rows: 1fr minmax(200px, 34%);
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+}
+
+/* Top bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.icon-only {
+  padding: 6px 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Panels */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: auto;
+}
+
+.panel-live {
+  border: 2px solid var(--primary);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.panel-live .panel-title {
+  color: var(--primary-text);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* The slide preview is always dark: it shows what the congregation sees. */
+.slide-frame {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 6px;
+  background: #000;
+  border: 1px solid var(--border);
+}
+
+/* Library */
+.library {
+  grid-column: 1 / -1;
+}
+
+.library-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--surface-2);
+  color: var(--primary-text);
+}
+
+.search {
+  flex: 1;
+  max-width: 360px;
+  margin-left: auto;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+/* Settings dialog */
+.dialog {
+  width: min(640px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
   color: var(--fg);
+}
+
+.dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 18px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.setting-group h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.hint {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.choice.selected {
+  border: 2px solid var(--primary);
+  padding: 9px 11px;
+}
+
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.swatch-dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 60%));
+}
+
+.swatch.selected {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.swatch.selected .swatch-dot {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.custom-color {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.swatch-dot {
+  position: relative;
+}
+
+.swatch-custom {
+  background: conic-gradient(#ef4444, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444);
+}
+
+/* The native color input covers the dot invisibly, so a click opens the picker. */
+.custom-color input[type='color'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hex-input {
+  width: 110px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.hex-input.invalid {
+  border-color: #dc2626;
+}
+
+.field-error {
+  margin: 0;
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.about {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.about dt {
+  color: var(--muted);
+}
+
+.about dd {
+  margin: 0;
 }
