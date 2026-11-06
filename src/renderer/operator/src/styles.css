@@ -1,0 +1,48 @@
+:root {
+  --primary: #d4a017;
+  --bg: #171412;
+  --surface: #26211d;
+  --fg: #f5f0e6;
+  --muted: #a8a29e;
+  color-scheme: dark;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.splash h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.splash dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 16px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.splash dd {
+  margin: 0;
+  color: var(--fg);
+}
