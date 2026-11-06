@@ -33,7 +33,14 @@ export class LiveStore {
 
   showDeck(deck: LiveDeck, index: number): LiveState {
     if (!Array.isArray(deck?.slides) || deck.slides.length > MAX_DECK_SLIDES) throw new Error('Item terlalu besar.')
-    return this.set(showDeck(this.state, { title: String(deck.title ?? ''), slides: deck.slides }, index))
+    const source = typeof deck.source === 'string' ? deck.source.slice(0, 64) : undefined
+    return this.set(
+      showDeck(
+        this.state,
+        { title: String(deck.title ?? ''), slides: deck.slides, ...(source ? { source } : {}) },
+        index
+      )
+    )
   }
 
   goTo(index: number): LiveState {

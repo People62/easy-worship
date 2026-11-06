@@ -28,6 +28,8 @@ export interface Slide {
 export interface LiveDeck {
   title: string
   slides: Slide[]
+  // The schedule item it came from, so the Schedule can mark it.
+  source?: string
 }
 
 export interface SlideStyle {
