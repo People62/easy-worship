@@ -52,3 +52,10 @@ Fokus keyboard selalu terlihat (`--focus-ring`), karena operator sering memakai 
 ## 5. Cara memeriksa perubahan tampilan
 
 Sebelum membuka PR yang mengubah tampilan, ambil tangkapan layar di 1366×768, 1920×1080, dan 2560×1080, dalam mode gelap dan terang. Periksa Preview/Live, setiap tab Pustaka, dan dialog.
+
+## 6. Bahasa
+
+- Antarmuka tersedia dalam Bahasa Indonesia dan English (Pengaturan → Bahasa · Language). Isi slide (lirik, ayat, pengumuman) tidak diterjemahkan.
+- Semua teks yang tampil ke operator ditulis lewat `t('…')` dari `@shared/i18n`. Teks Indonesia adalah kuncinya, dan terjemahan Inggris ada di `src/shared/i18n/en.ts`.
+- TypeScript menolak `t()` dengan kunci yang belum ada di `en.ts`, dan test memastikan `{placeholder}` sama di kedua bahasa.
+- Pesan error dari main process memakai bahasa yang sama dengan pengaturan.

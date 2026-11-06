@@ -182,6 +182,7 @@ Yang dikerjakan:
 - [x] Spesifikasi tombol: biasa, utama, ghost, bahaya, aktif; ukuran normal dan kecil; fokus keyboard selalu terlihat.
 - [x] Ikon garis untuk Schedule, Pustaka, Preview, Live, dan bilah atas.
 - [x] Badge Black/Clear/Logo di judul panel Live; status output berwarna hijau (tersambung) atau oranye (tidak ada layar).
+- [x] Pilihan bahasa Bahasa Indonesia / English di Pengaturan (permintaan saat uji di Windows). Isi slide tidak diterjemahkan.
 - [x] Kontras warna diuji otomatis untuk teks biasa, teks redup, dan warna status di mode gelap dan terang.
 
 Sudah diperiksa dengan tangkapan layar di 1366×768, 1920×1080, dan 2560×1080, mode gelap dan terang.
