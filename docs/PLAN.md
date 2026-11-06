@@ -62,13 +62,17 @@ easy-worship/
 
 **Selesai bila:** installer kosong bisa dipasang dan dibuka di Windows 10.
 
+**Hasil (2026-11-06):** lulus. Installer dari CI terpasang di Windows; aplikasi menampilkan v0.0.0, Electron 45.2.3, dan SQLite 3.53.4.
+
 ### Tahap 1 · Fondasi (S)
 
-- [ ] Skema database + sistem migrasi (tabel dari PRD bagian 7).
-- [ ] Lapisan IPC bertipe: `songs.search()`, `bible.get()`, `live.show()`, dan seterusnya.
-- [ ] Penyimpanan pengaturan (mode, warna primer, monitor output).
-- [ ] Sistem tampilan: CSS variables, mode gelap/terang, warna primer (F-UI-01 s.d. 06).
-- [ ] Kerangka layar operator: bilah atas, Schedule, Preview, Live, Pustaka (masih kosong).
+- [x] Skema database + sistem migrasi (tabel dari PRD bagian 7).
+- [x] Lapisan IPC bertipe dalam satu kontrak (`src/shared/ipc.ts`). Tahap 1 berisi `app`, `settings`, dan `displays`; `songs`, `bible`, `live`, dan lainnya ditambahkan di tahapnya masing-masing.
+- [x] Penyimpanan pengaturan (mode, warna primer, monitor output).
+- [x] Sistem tampilan: CSS variables, mode gelap/terang, warna primer (F-UI-01 s.d. 06).
+- [x] Kerangka layar operator: bilah atas, Schedule, Preview, Live, Pustaka (masih kosong).
+
+Catatan: ukuran panel yang bisa digeser dan diingat (PRD bagian 6) dipindah ke Tahap 6, bersama alur Schedule dan Live.
 
 **Selesai bila:** layar operator terbuka, mode dan warna bisa diganti lalu diingat.
 
@@ -114,6 +118,7 @@ easy-worship/
 - [ ] Simpan dan buka file `.egw`.
 - [ ] Preview → Live dengan Enter; pindah slide dengan panah, Page Up/Down, spasi, clicker.
 - [ ] Semua pintasan keyboard dari PRD.
+- [ ] Ukuran panel bisa digeser dan diingat (dipindah dari Tahap 1).
 
 **Selesai bila:** satu urutan ibadah lengkap bisa disusun dan dijalankan hanya dengan keyboard.
 
@@ -146,7 +151,7 @@ Catatan: jika di laptop gereja ternyata ada `Songs.DB`, impor EasyWorship bisa d
 
 | Jenis | Apa yang diuji | Kapan |
 | --- | --- | --- |
-| Unit test (Vitest) | Parser referensi Alkitab, pemecah slide, importer | Setiap perubahan |
+| Unit test (Vitest, dijalankan di dalam Electron agar modul SQLite bisa dipakai) | Database, pengaturan, warna, parser referensi Alkitab, pemecah slide, importer | Setiap perubahan |
 | Uji manual di laptop sendiri | Alur operator, mode jendela output | Akhir tiap tahap |
 | Uji di laptop gereja | HDMI + 3 TV, RAM 4 GB, video latar | Akhir Tahap 2, 5, dan 7 |
 | Gladi bersih | Ibadah simulasi 90 menit dengan daftar cek | Tahap 7 |

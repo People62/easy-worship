@@ -9,7 +9,7 @@ files:
   - '!src/*'
   - '!docs/*'
   - '!tests/*'
-  - '!{electron.vite.config.ts,vitest.config.ts,eslint.config.mjs,commitlint.config.mjs,electron-builder.yml}'
+  - '!{electron.vite.config.ts,vitest.config.mts,eslint.config.mjs,commitlint.config.mjs,electron-builder.yml}'
   - '!{.eslintcache,.prettierrc.json,.prettierignore,.nvmrc,.gitattributes}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
