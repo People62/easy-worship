@@ -8,21 +8,30 @@ export interface AppSettings {
     primary: string
   }
   output: {
-    // Electron display id of the projector/TV, or null to ask the operator.
+    // Electron display id of the TV, or null to pick the first external display.
     displayId: number | null
+    // Window mode (PRD F-OT-03): output in a normal window, for testing
+    // without a projector.
+    windowed: boolean
+  }
+  church: {
+    // File name of the church logo inside the app's user data folder.
+    logoFile: string | null
   }
 }
 
 export type SettingsPatch = {
   appearance?: Partial<AppSettings['appearance']>
   output?: Partial<AppSettings['output']>
+  church?: Partial<AppSettings['church']>
 }
 
 export const DEFAULT_PRIMARY = '#D4A017'
 
 export const DEFAULT_SETTINGS: AppSettings = {
   appearance: { mode: 'dark', primary: DEFAULT_PRIMARY },
-  output: { displayId: null }
+  output: { displayId: null, windowed: false },
+  church: { logoFile: null }
 }
 
 export const PRIMARY_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
@@ -46,6 +55,16 @@ function isDisplayId(value: unknown): value is number | null {
   return value === null || (typeof value === 'number' && Number.isInteger(value))
 }
 
+// Only a bare file name such as "logo.png": no folders, so a damaged setting
+// can never point outside the app's own folder.
+export function isLogoFileName(value: unknown): value is string {
+  return typeof value === 'string' && /^[\w-]+\.(png|jpe?g|webp|gif|svg)$/i.test(value)
+}
+
+function isLogoFile(value: unknown): value is string | null {
+  return value === null || isLogoFileName(value)
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 }
@@ -57,6 +76,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const root = asRecord(raw)
   const appearance = asRecord(root.appearance)
   const output = asRecord(root.output)
+  const church = asRecord(root.church)
 
   return {
     appearance: {
@@ -64,7 +84,11 @@ export function normalizeSettings(raw: unknown): AppSettings {
       primary: isHexColor(appearance.primary) ? normalizeHex(appearance.primary) : DEFAULT_SETTINGS.appearance.primary
     },
     output: {
-      displayId: isDisplayId(output.displayId) ? output.displayId : DEFAULT_SETTINGS.output.displayId
+      displayId: isDisplayId(output.displayId) ? output.displayId : DEFAULT_SETTINGS.output.displayId,
+      windowed: typeof output.windowed === 'boolean' ? output.windowed : DEFAULT_SETTINGS.output.windowed
+    },
+    church: {
+      logoFile: isLogoFile(church.logoFile) ? church.logoFile : DEFAULT_SETTINGS.church.logoFile
     }
   }
 }
@@ -74,7 +98,8 @@ export function normalizeSettings(raw: unknown): AppSettings {
 export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): AppSettings {
   const next: AppSettings = {
     appearance: { ...current.appearance },
-    output: { ...current.output }
+    output: { ...current.output },
+    church: { ...current.church }
   }
 
   if (patch.appearance?.mode !== undefined) {
@@ -88,6 +113,14 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
   if (patch.output?.displayId !== undefined) {
     if (!isDisplayId(patch.output.displayId)) throw new Error(`Invalid display id: ${String(patch.output.displayId)}`)
     next.output.displayId = patch.output.displayId
+  }
+  if (patch.output?.windowed !== undefined) {
+    if (typeof patch.output.windowed !== 'boolean') throw new Error('Invalid window mode')
+    next.output.windowed = patch.output.windowed
+  }
+  if (patch.church?.logoFile !== undefined) {
+    if (!isLogoFile(patch.church.logoFile)) throw new Error(`Invalid logo file: ${String(patch.church.logoFile)}`)
+    next.church.logoFile = patch.church.logoFile
   }
 
   return next
