@@ -27,6 +27,12 @@ export interface AppSettings {
     // The translation used for lookups, or null for the first one.
     versionId: number | null
   }
+  // Default theme for each kind of slide, or null for the first of that kind.
+  themes: {
+    song: number | null
+    bible: number | null
+    text: number | null
+  }
 }
 
 export type SettingsPatch = {
@@ -35,6 +41,7 @@ export type SettingsPatch = {
   church?: Partial<AppSettings['church']>
   songs?: Partial<AppSettings['songs']>
   bible?: Partial<AppSettings['bible']>
+  themes?: Partial<AppSettings['themes']>
 }
 
 export const DEFAULT_PRIMARY = '#D4A017'
@@ -44,7 +51,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   output: { displayId: null, windowed: false },
   church: { logoFile: null },
   songs: { linesPerSlide: DEFAULT_LINES_PER_SLIDE },
-  bible: { versionId: null }
+  bible: { versionId: null },
+  themes: { song: null, bible: null, text: null }
 }
 
 export const PRIMARY_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
@@ -96,6 +104,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const church = asRecord(root.church)
   const songs = asRecord(root.songs)
   const bible = asRecord(root.bible)
+  const themes = asRecord(root.themes)
 
   return {
     appearance: {
@@ -114,6 +123,11 @@ export function normalizeSettings(raw: unknown): AppSettings {
     },
     bible: {
       versionId: isDisplayId(bible.versionId) ? bible.versionId : DEFAULT_SETTINGS.bible.versionId
+    },
+    themes: {
+      song: isDisplayId(themes.song) ? themes.song : null,
+      bible: isDisplayId(themes.bible) ? themes.bible : null,
+      text: isDisplayId(themes.text) ? themes.text : null
     }
   }
 }
@@ -126,7 +140,8 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
     output: { ...current.output },
     church: { ...current.church },
     songs: { ...current.songs },
-    bible: { ...current.bible }
+    bible: { ...current.bible },
+    themes: { ...current.themes }
   }
 
   if (patch.appearance?.mode !== undefined) {
@@ -158,6 +173,12 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
   if (patch.bible?.versionId !== undefined) {
     if (!isDisplayId(patch.bible.versionId)) throw new Error(`Invalid bible version: ${String(patch.bible.versionId)}`)
     next.bible.versionId = patch.bible.versionId
+  }
+  for (const kind of ['song', 'bible', 'text'] as const) {
+    const value = patch.themes?.[kind]
+    if (value === undefined) continue
+    if (!isDisplayId(value)) throw new Error(`Invalid theme: ${String(value)}`)
+    next.themes[kind] = value
   }
 
   return next

@@ -14,14 +14,16 @@ describe('normalizeSettings', () => {
       output: { displayId: 7, windowed: true },
       church: { logoFile: 'logo.png' },
       songs: { linesPerSlide: 2 },
-      bible: { versionId: 3 }
+      bible: { versionId: 3 },
+      themes: { song: 1, bible: 2, text: null }
     })
     expect(result).toEqual({
       appearance: { mode: 'light', primary: '#2563EB' },
       output: { displayId: 7, windowed: true },
       church: { logoFile: 'logo.png' },
       songs: { linesPerSlide: 2 },
-      bible: { versionId: 3 }
+      bible: { versionId: 3 },
+      themes: { song: 1, bible: 2, text: null }
     })
   })
 
@@ -34,7 +36,7 @@ describe('normalizeSettings', () => {
 
   it('drops unknown keys', () => {
     const result = normalizeSettings({ appearance: { mode: 'dark', extra: true }, other: 1 })
-    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs', 'bible'])
+    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs', 'bible', 'themes'])
     expect(Object.keys(result.appearance)).toEqual(['mode', 'primary'])
   })
 })
