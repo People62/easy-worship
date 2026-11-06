@@ -165,16 +165,26 @@ Catatan:
 
 Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua layar setelah semuanya berfungsi, memakai skill `design-system` (token, skala huruf dan jarak, spesifikasi komponen).
 
-**Catatan desain yang sudah ditemukan**
+**Catatan desain yang sudah ditemukan** (semua sudah ditangani)
 
-- Di layar lebar (sekitar 2000 px), Preview dan Live terlalu besar sehingga banyak ruang kosong di bawahnya.
-- Panel Schedule lebar tetapi isinya sedikit.
-- Ukuran huruf terasa kecil dibanding luas layar.
-- Di layar 1366×768, daftar slide di Preview harus di-scroll karena slide besar memakan tempat. Pertimbangkan Preview yang lebih kecil atau thumbnail di samping.
-- Tab Tema di Pustaka terasa sempit di layar 1366×768: kartu tema terpotong dan perlu di-scroll.
-- Di 1366×768, judul panjang di kepala Preview dan Live terbungkus dua baris dan mendorong tombol; daftar slide Live hanya terlihat sebagian.
-- Tombol Schedule (Baru, Buka, ▾, Simpan) masih polos; pertimbangkan ikon dan menu "Buka terakhir" yang lebih jelas.
-- Tanda jenis item di Schedule (L, A, M, T) masih huruf; pertimbangkan ikon dan warna per jenis.
+- [x] Di layar lebar, Preview dan Live terlalu besar. Sekarang slide memakai sekitar 60% tinggi panel dan selalu 16:9, dengan daftar slide di bawahnya.
+- [x] Panel Schedule lebar tetapi isinya sedikit. Sekarang ada ikon dan warna per jenis item; lebarnya ikut membesar di layar lebar.
+- [x] Ukuran huruf kecil di layar lebar. Sekarang ukuran dasar tumbuh dari 15 px (1366 px) sampai 18 px.
+- [x] Di 1366×768, daftar slide di Preview harus di-scroll. Sekarang daftar slide punya scroll sendiri dan selalu terlihat.
+- [x] Tab Tema sempit. Sekarang satu jenis tema per tampilan (Lagu, Alkitab, Teks) dengan kartu dalam grid.
+- [x] Judul panjang di kepala Preview dan Live terbungkus. Sekarang satu baris dengan elipsis; tombol tidak terdorong.
+- [x] Tombol Schedule polos. Sekarang ada ikon; Simpan disorot saat ada perubahan.
+- [x] Tanda jenis item berupa huruf. Sekarang berupa ikon berwarna.
+
+Yang dikerjakan:
+
+- [x] Token tiga lapis (dasar, makna, komponen), skala jarak dan huruf dalam rem. Lihat [DESIGN.md](DESIGN.md).
+- [x] Spesifikasi tombol: biasa, utama, ghost, bahaya, aktif; ukuran normal dan kecil; fokus keyboard selalu terlihat.
+- [x] Ikon garis untuk Schedule, Pustaka, Preview, Live, dan bilah atas.
+- [x] Badge Black/Clear/Logo di judul panel Live; status output berwarna hijau (tersambung) atau oranye (tidak ada layar).
+- [x] Kontras warna diuji otomatis untuk teks biasa, teks redup, dan warna status di mode gelap dan terang.
+
+Sudah diperiksa dengan tangkapan layar di 1366×768, 1920×1080, dan 2560×1080, mode gelap dan terang.
 
 **Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
 
