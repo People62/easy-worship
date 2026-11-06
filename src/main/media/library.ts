@@ -2,6 +2,7 @@ import { copyFile, mkdir, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type Database from 'better-sqlite3'
 import type { MediaRef } from '@shared/theme'
+import { t } from '@shared/i18n'
 
 export type MediaKind = 'image' | 'video'
 
@@ -106,11 +107,11 @@ export class MediaLibrary {
 
   async setInfo(id: number, info: MediaInfo): Promise<MediaItem> {
     const item = this.get(id)
-    if (!item) throw new Error('Media tidak ditemukan.')
+    if (!item) throw new Error(t('Media tidak ditemukan.'))
     const match = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(info.thumbnail)
-    if (!match) throw new Error('Thumbnail tidak valid.')
+    if (!match) throw new Error(t('Thumbnail tidak valid.'))
     const bytes = Buffer.from(match[1], 'base64')
-    if (bytes.length > MAX_THUMBNAIL_BYTES) throw new Error('Thumbnail terlalu besar.')
+    if (bytes.length > MAX_THUMBNAIL_BYTES) throw new Error(t('Thumbnail terlalu besar.'))
 
     await mkdir(thumbsDir(this.userDataDir), { recursive: true })
     const thumbnail = `${id}.jpg`
@@ -125,9 +126,9 @@ export class MediaLibrary {
 
   rename(id: number, name: string): MediaItem {
     const clean = name.trim().slice(0, 120)
-    if (!clean) throw new Error('Nama media wajib diisi.')
+    if (!clean) throw new Error(t('Nama media wajib diisi.'))
     if (this.db.prepare('UPDATE media SET name = ? WHERE id = ?').run(clean, id).changes === 0) {
-      throw new Error('Media tidak ditemukan.')
+      throw new Error(t('Media tidak ditemukan.'))
     }
     return this.get(id)!
   }
@@ -144,10 +145,11 @@ export class MediaLibrary {
 
   private async importFile(source: string): Promise<MediaItem> {
     const kind = mediaKind(source)
-    if (!kind) throw new Error('Format tidak didukung. Gambar: JPG, PNG, WEBP. Video: MP4, WEBM.')
+    if (!kind) throw new Error(t('Format tidak didukung. Gambar: JPG, PNG, WEBP. Video: MP4, WEBM.'))
     const info = await stat(source)
     const limit = kind === 'image' ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES
-    if (info.size > limit) throw new Error(`File terlalu besar (maksimal ${kind === 'image' ? '50 MB' : '2 GB'}).`)
+    if (info.size > limit)
+      throw new Error(t('File terlalu besar (maksimal {max}).', { max: kind === 'image' ? '50 MB' : '2 GB' }))
 
     const ext = extname(source).slice(1).toLowerCase()
     const name = basename(source, extname(source)).slice(0, 120)

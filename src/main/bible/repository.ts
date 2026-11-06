@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type { BibleReference } from '@shared/bible/reference'
 import type { BibleVerse } from '@shared/bible/slides'
 import { cleanAbbreviation, type ImportedBible } from './importers'
+import { t } from '@shared/i18n'
 
 export interface BibleVersion {
   id: number
@@ -54,16 +55,16 @@ export class BibleRepository {
   renameVersion(id: number, name: string, abbreviation: string): BibleVersion {
     const cleanName = name.trim().slice(0, 200)
     const cleanAbbr = cleanAbbreviation(abbreviation)
-    if (!cleanName) throw new Error('Nama terjemahan wajib diisi.')
-    if (!cleanAbbr) throw new Error('Singkatan wajib diisi (huruf atau angka).')
+    if (!cleanName) throw new Error(t('Nama terjemahan wajib diisi.'))
+    if (!cleanAbbr) throw new Error(t('Singkatan wajib diisi (huruf atau angka).'))
     const taken = this.db
       .prepare('SELECT id FROM bible_versions WHERE abbreviation = ? COLLATE NOCASE AND id != ?')
       .get(cleanAbbr, id)
-    if (taken) throw new Error(`Singkatan ${cleanAbbr} sudah dipakai terjemahan lain.`)
+    if (taken) throw new Error(t('Singkatan {abbr} sudah dipakai terjemahan lain.', { abbr: cleanAbbr }))
     const result = this.db
       .prepare('UPDATE bible_versions SET name = ?, abbreviation = ? WHERE id = ?')
       .run(cleanName, cleanAbbr, id)
-    if (result.changes === 0) throw new Error('Terjemahan tidak ditemukan.')
+    if (result.changes === 0) throw new Error(t('Terjemahan tidak ditemukan.'))
     return this.getVersion(id)!
   }
 
@@ -98,7 +99,9 @@ export class BibleRepository {
       }
       if (verses.length > MAX_PASSAGE_VERSES) {
         throw new Error(
-          `Bagian terlalu panjang (lebih dari ${MAX_PASSAGE_VERSES} ayat). Pilih bagian yang lebih pendek.`
+          t('Bagian terlalu panjang (lebih dari {max} ayat). Pilih bagian yang lebih pendek.', {
+            max: MAX_PASSAGE_VERSES
+          })
         )
       }
     }

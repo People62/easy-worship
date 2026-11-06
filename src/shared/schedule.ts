@@ -1,4 +1,5 @@
 import type { Slide, SlideStyle } from './live'
+import { t } from './i18n'
 
 // The order of service. Items point at songs, passages, and media in the
 // library by id; announcements carry their own text. A schedule is saved as
@@ -24,11 +25,8 @@ export type ScheduleItemKind = ScheduleItem['kind']
 // An item before it is in a schedule (from the library or a drag).
 export type NewScheduleItem = ScheduleItem extends infer T ? (T extends ScheduleItem ? Omit<T, 'uid'> : never) : never
 
-export const SCHEDULE_KIND_LABELS: Record<ScheduleItemKind, string> = {
-  song: 'Lagu',
-  bible: 'Alkitab',
-  media: 'Media',
-  text: 'Teks'
+export function scheduleKindLabel(kind: ScheduleItemKind): string {
+  return { song: t('Lagu'), bible: t('Alkitab'), media: t('Media'), text: t('Teks') }[kind]
 }
 
 export const SCHEDULE_EXTENSION = 'egw'
@@ -179,14 +177,14 @@ export function parseScheduleFile(content: string): ParsedSchedule {
   try {
     data = JSON.parse(content.replace(/^\uFEFF/, ''))
   } catch (error) {
-    throw new Error('File schedule rusak atau bukan file .egw.', { cause: error })
+    throw new Error(t('File schedule rusak atau bukan file .egw.'), { cause: error })
   }
   const root = asRecord(data)
   if (!root || root.format !== SCHEDULE_FORMAT || !Array.isArray(root.items)) {
-    throw new Error('File ini bukan schedule El-Gibbor Worship.')
+    throw new Error(t('File ini bukan schedule El-Gibbor Worship.'))
   }
   if (typeof root.version !== 'number' || root.version > SCHEDULE_FILE_VERSION) {
-    throw new Error('Schedule ini dibuat oleh versi aplikasi yang lebih baru. Perbarui aplikasi dulu.')
+    throw new Error(t('Schedule ini dibuat oleh versi aplikasi yang lebih baru. Perbarui aplikasi dulu.'))
   }
   const items: ScheduleItem[] = []
   let skipped = 0
@@ -201,11 +199,12 @@ export function parseScheduleFile(content: string): ParsedSchedule {
 
 // Checks a whole schedule sent by the renderer before it is written to disk.
 export function validateScheduleItems(value: unknown): ScheduleItem[] {
-  if (!Array.isArray(value)) throw new Error('Schedule tidak valid.')
-  if (value.length > MAX_SCHEDULE_ITEMS) throw new Error(`Schedule maksimal ${MAX_SCHEDULE_ITEMS} item.`)
+  if (!Array.isArray(value)) throw new Error(t('Schedule tidak valid.'))
+  if (value.length > MAX_SCHEDULE_ITEMS)
+    throw new Error(t('Schedule maksimal {max} item.', { max: MAX_SCHEDULE_ITEMS }))
   return value.map((raw, index) => {
     const item = parseScheduleItem(raw)
-    if (!item) throw new Error(`Item ke-${index + 1} tidak valid.`)
+    if (!item) throw new Error(t('Item ke-{n} tidak valid.', { n: index + 1 }))
     const uid = asRecord(raw)?.uid
     return { ...item, uid: typeof uid === 'string' && uid.length <= 64 ? uid : newUid() } as ScheduleItem
   })

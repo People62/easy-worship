@@ -1,12 +1,13 @@
 import { screen, type Display } from 'electron'
 import type { DisplayInfo } from '@shared/ipc'
+import { t } from '@shared/i18n'
 
 export function toDisplayInfo(display: Display, primaryId: number, index: number): DisplayInfo {
   const isPrimary = display.id === primaryId
-  const name = display.label?.trim() || `Layar ${index + 1}`
+  const name = display.label?.trim() || t('Layar {n}', { n: index + 1 })
   return {
     id: display.id,
-    label: isPrimary ? `${name} (layar utama)` : name,
+    label: isPrimary ? t('{name} (layar utama)', { name }) : name,
     width: display.size.width,
     height: display.size.height,
     isPrimary

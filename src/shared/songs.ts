@@ -1,3 +1,5 @@
+import { t } from './i18n'
+
 // Songs and their lyrics. Lyrics are edited as plain text with section
 // markers such as [Verse 1] or [Reff], and stored as separate sections.
 
@@ -40,7 +42,7 @@ const SECTION_LABELS: Record<SectionKind, string> = {
   bridge: 'Bridge',
   tag: 'Tag',
   ending: 'Ending',
-  other: 'Bagian'
+  other: ''
 }
 
 // Marker words people use in Indonesian churches, mapped to a section kind.
@@ -76,7 +78,7 @@ const MARKER_ALIASES: Record<string, SectionKind> = {
 }
 
 export function sectionLabel(section: Pick<SongSection, 'kind' | 'number'>): string {
-  const base = SECTION_LABELS[section.kind]
+  const base = SECTION_LABELS[section.kind] || t('Bagian')
   return section.number === null ? base : `${base} ${section.number}`
 }
 
@@ -145,33 +147,35 @@ export function songFirstLine(sections: SongSection[]): string {
 // Checks a song before saving. Returns the cleaned song, or throws with a
 // message the operator can read.
 export function validateSongInput(input: unknown): SongInput {
-  if (typeof input !== 'object' || input === null) throw new Error('Data lagu tidak valid.')
+  if (typeof input !== 'object' || input === null) throw new Error(t('Data lagu tidak valid.'))
   const raw = input as Record<string, unknown>
   const text = (value: unknown, field: string, max: number): string => {
     if (value === undefined || value === null) return ''
-    if (typeof value !== 'string') throw new Error(`Kolom ${field} tidak valid.`)
+    if (typeof value !== 'string') throw new Error(t('Kolom {field} tidak valid.', { field }))
     const trimmed = value.trim()
-    if (trimmed.length > max) throw new Error(`Kolom ${field} terlalu panjang (maksimal ${max} karakter).`)
+    if (trimmed.length > max)
+      throw new Error(t('Kolom {field} terlalu panjang (maksimal {max} karakter).', { field, max }))
     return trimmed
   }
 
   const title = text(raw.title, 'judul', 200)
-  if (!title) throw new Error('Judul lagu wajib diisi.')
+  if (!title) throw new Error(t('Judul lagu wajib diisi.'))
 
-  if (!Array.isArray(raw.sections)) throw new Error('Lirik lagu tidak valid.')
+  if (!Array.isArray(raw.sections)) throw new Error(t('Lirik lagu tidak valid.'))
   const sections = raw.sections.map((section, index): SongSection => {
     const s = (section ?? {}) as Record<string, unknown>
-    if (!SECTION_KINDS.includes(s.kind as SectionKind)) throw new Error(`Jenis bagian ke-${index + 1} tidak valid.`)
+    if (!SECTION_KINDS.includes(s.kind as SectionKind))
+      throw new Error(t('Jenis bagian ke-{n} tidak valid.', { n: index + 1 }))
     const number = s.number === null || s.number === undefined ? null : Number(s.number)
     if (number !== null && (!Number.isInteger(number) || number < 1 || number > 99)) {
-      throw new Error(`Nomor bagian ke-${index + 1} tidak valid.`)
+      throw new Error(t('Nomor bagian ke-{n} tidak valid.', { n: index + 1 }))
     }
     const body = normalizeText(text(s.text, 'lirik', 5000))
     return { kind: s.kind as SectionKind, number, text: body }
   })
   const nonEmpty = sections.filter((s) => s.text !== '')
-  if (nonEmpty.length === 0) throw new Error('Lirik lagu masih kosong.')
-  if (nonEmpty.length > 100) throw new Error('Lagu terlalu banyak bagian (maksimal 100).')
+  if (nonEmpty.length === 0) throw new Error(t('Lirik lagu masih kosong.'))
+  if (nonEmpty.length > 100) throw new Error(t('Lagu terlalu banyak bagian (maksimal 100).'))
 
   return {
     title,

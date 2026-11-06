@@ -10,13 +10,14 @@ import {
   type ParsedSchedule,
   type ScheduleItem
 } from '@shared/schedule'
+import { t } from '@shared/i18n'
 
 export const MAX_RECENT = 10
 
 export async function readScheduleFile(path: string): Promise<ParsedSchedule> {
   const info = await stat(path).catch(() => null)
-  if (!info?.isFile()) throw new Error('File schedule tidak ditemukan. Mungkin sudah dipindah atau dihapus.')
-  if (info.size > MAX_SCHEDULE_FILE_BYTES) throw new Error('File terlalu besar untuk sebuah schedule.')
+  if (!info?.isFile()) throw new Error(t('File schedule tidak ditemukan. Mungkin sudah dipindah atau dihapus.'))
+  if (info.size > MAX_SCHEDULE_FILE_BYTES) throw new Error(t('File terlalu besar untuk sebuah schedule.'))
   return parseScheduleFile(await readFile(path, 'utf8'))
 }
 
@@ -29,7 +30,7 @@ export async function writeScheduleFile(path: string, items: ScheduleItem[]): Pr
     await rename(temp, path)
   } catch (error) {
     await rm(temp, { force: true })
-    throw new Error('Schedule tidak bisa disimpan. Periksa apakah folder bisa ditulisi.', { cause: error })
+    throw new Error(t('Schedule tidak bisa disimpan. Periksa apakah folder bisa ditulisi.'), { cause: error })
   }
 }
 

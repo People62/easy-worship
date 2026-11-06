@@ -10,6 +10,7 @@ import {
   type ThemeInput,
   type ThemeKind
 } from '@shared/theme'
+import { t } from '@shared/i18n'
 
 interface ThemeRow {
   id: number
@@ -60,7 +61,7 @@ export class ThemeRepository {
     const result = this.db
       .prepare("UPDATE themes SET name = ?, kind = ?, data = ?, updated_at = datetime('now') WHERE id = ?")
       .run(input.name, input.kind, this.serialize(input), id)
-    if (result.changes === 0) throw new Error('Tema tidak ditemukan.')
+    if (result.changes === 0) throw new Error(t('Tema tidak ditemukan.'))
     return this.get(id)!
   }
 
@@ -70,7 +71,7 @@ export class ThemeRepository {
     if (!theme) return
     const count = (this.db.prepare('SELECT COUNT(*) AS n FROM themes WHERE kind = ?').get(theme.kind) as { n: number })
       .n
-    if (count <= 1) throw new Error('Tema terakhir untuk jenis ini tidak bisa dihapus. Buat tema lain dulu.')
+    if (count <= 1) throw new Error(t('Tema terakhir untuk jenis ini tidak bisa dihapus. Buat tema lain dulu.'))
     this.db.transaction(() => {
       this.db.prepare('UPDATE songs SET theme_id = NULL WHERE theme_id = ?').run(id)
       this.db.prepare('DELETE FROM themes WHERE id = ?').run(id)
