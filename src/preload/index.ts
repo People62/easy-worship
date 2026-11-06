@@ -44,6 +44,14 @@ const api = {
   church: {
     chooseLogo: () => invoke('church:choose-logo'),
     removeLogo: () => invoke('church:remove-logo')
+  },
+  songs: {
+    search: (...args: InvokeContract['songs:search']['args']) => invoke('songs:search', ...args),
+    get: (...args: InvokeContract['songs:get']['args']) => invoke('songs:get', ...args),
+    create: (...args: InvokeContract['songs:create']['args']) => invoke('songs:create', ...args),
+    update: (...args: InvokeContract['songs:update']['args']) => invoke('songs:update', ...args),
+    delete: (...args: InvokeContract['songs:delete']['args']) => invoke('songs:delete', ...args),
+    onChanged: (listener: (id: EventContract['songs:changed']) => void) => on('songs:changed', listener)
   }
 }
 

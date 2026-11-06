@@ -1,6 +1,7 @@
 import type { LiveState, Overlay, Slide } from './live'
 import type { OutputStatus } from './output'
 import type { AppSettings, SettingsPatch } from './settings'
+import type { Song, SongInput, SongSummary } from './songs'
 
 // The single list of IPC calls between the windows and the main process.
 // Main must register a handler for every entry (checked by TypeScript in
@@ -38,6 +39,11 @@ export interface InvokeContract {
   // Opens a file picker; resolves with the new settings, or null if cancelled.
   'church:choose-logo': { args: []; result: AppSettings | null }
   'church:remove-logo': { args: []; result: AppSettings }
+  'songs:search': { args: [query: string]; result: SongSummary[] }
+  'songs:get': { args: [id: number]; result: Song | null }
+  'songs:create': { args: [input: SongInput]; result: Song }
+  'songs:update': { args: [id: number, input: SongInput]; result: Song }
+  'songs:delete': { args: [id: number]; result: void }
 }
 
 // Push events: main -> renderer.
@@ -46,6 +52,8 @@ export interface EventContract {
   'displays:changed': DisplayInfo[]
   'live:changed': LiveState
   'output:status-changed': OutputStatus
+  // A song was created, changed, or deleted (its id), so lists can refresh.
+  'songs:changed': number
 }
 
 export type InvokeChannel = keyof InvokeContract
