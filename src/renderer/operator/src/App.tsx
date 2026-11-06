@@ -7,7 +7,7 @@ export function App(): React.JSX.Element {
   const [info, setInfo] = useState<AppInfo | null>(null)
 
   useEffect(() => {
-    void window.api.getAppInfo().then(setInfo)
+    void window.api.app.getInfo().then(setInfo)
   }, [])
 
   return (
