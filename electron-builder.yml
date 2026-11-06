@@ -1,0 +1,36 @@
+appId: org.elgibbor.worship
+productName: El-Gibbor Worship
+copyright: Copyright © 2026 People62
+directories:
+  buildResources: build
+  output: release/${version}
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!docs/*'
+  - '!tests/*'
+  - '!{electron.vite.config.ts,vitest.config.ts,eslint.config.mjs,commitlint.config.mjs,electron-builder.yml}'
+  - '!{.eslintcache,.prettierrc.json,.prettierignore,.nvmrc,.gitattributes}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
+win:
+  target:
+    - nsis
+  icon: build/icon.png
+  executableName: el-gibbor-worship
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  license: LICENSE
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: El-Gibbor Worship
+  createDesktopShortcut: always
+linux:
+  target:
+    - AppImage
+  icon: build/icon.png
+  category: Utility
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
+publish: null
