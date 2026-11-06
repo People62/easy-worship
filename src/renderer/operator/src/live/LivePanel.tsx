@@ -1,5 +1,6 @@
 import type { LiveState } from '@shared/live'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
+import { ChevronLeftIcon, ChevronRightIcon, StopIcon } from '../components/Icons'
 
 const OVERLAY_NOTES = {
   black: 'Layar hitam aktif. Tekan F5 atau Esc untuk kembali.',
@@ -14,52 +15,63 @@ export function LivePanel({ live }: { live: LiveState }): React.JSX.Element {
   const count = deck?.slides.length ?? 0
 
   return (
-    <>
-      <div className="slide-frame">
-        <SlideRenderer slide={live.slide} style={live.style} overlay={live.overlay} logoUrl={live.logoUrl} />
-      </div>
-
-      <div className="preview-head">
-        <strong>{deck?.title || (live.slide ? 'Live' : 'Live kosong')}</strong>
-        {count > 0 && (
-          <span className="muted">
-            {live.slide?.label} · {live.index + 1}/{count}
+    <div className="deck">
+      <div className="deck-head">
+        <div className="deck-title">
+          <strong title={deck?.title}>{deck?.title || (live.slide ? 'Live' : 'Live kosong')}</strong>
+          <span className="deck-meta">
+            {count > 0
+              ? `${live.slide?.label ?? ''} · ${live.index + 1}/${count}`
+              : 'Tekan Enter untuk mengirim Preview'}
           </span>
-        )}
-        <span className="row live-nav">
+        </div>
+        <div className="deck-actions">
           <button
             type="button"
-            className="btn"
+            className="btn icon-only"
             disabled={!deck || live.index === 0}
             onClick={() => void window.api.live.step(-1)}
             title="Slide sebelumnya (panah kiri, Page Up)"
           >
-            ‹<span className="sr-only">Sebelumnya</span>
+            <ChevronLeftIcon />
+            <span className="sr-only">Sebelumnya</span>
           </button>
           <button
             type="button"
-            className="btn"
+            className="btn icon-only"
             disabled={!deck || live.index >= count - 1}
             onClick={() => void window.api.live.step(1)}
             title="Slide berikutnya (panah kanan, Page Down, Spasi)"
           >
-            ›<span className="sr-only">Berikutnya</span>
+            <ChevronRightIcon />
+            <span className="sr-only">Berikutnya</span>
           </button>
           <button
             type="button"
-            className="btn"
+            className="btn btn-ghost icon-only"
             disabled={!live.slide}
             onClick={() => void window.api.live.show(null)}
             title="Kosongkan Live"
           >
-            Kosongkan
+            <StopIcon />
+            <span className="sr-only">Kosongkan Live</span>
           </button>
-        </span>
+        </div>
       </div>
 
-      {live.overlay !== 'none' && <p className="live-note">{OVERLAY_NOTES[live.overlay]}</p>}
+      <div className="stage">
+        <div className="slide-frame">
+          <SlideRenderer slide={live.slide} style={live.style} overlay={live.overlay} logoUrl={live.logoUrl} />
+        </div>
+      </div>
 
-      {deck && count > 1 ? (
+      {live.overlay !== 'none' && (
+        <p className="live-note" role="status">
+          {OVERLAY_NOTES[live.overlay]}
+        </p>
+      )}
+
+      {deck && count > 1 && (
         <ol className="slide-grid" aria-label="Slide di Live">
           {deck.slides.map((slide, index) => (
             <li key={slide.id}>
@@ -80,13 +92,7 @@ export function LivePanel({ live }: { live: LiveState }): React.JSX.Element {
             </li>
           ))}
         </ol>
-      ) : (
-        live.overlay === 'none' && (
-          <p className="empty">
-            {live.slide ? 'Sama dengan di TV jemaat.' : 'Pilih item di Schedule atau Pustaka, lalu tekan Enter.'}
-          </p>
-        )
       )}
-    </>
+    </div>
   )
 }

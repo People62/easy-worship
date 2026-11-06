@@ -2,7 +2,7 @@ import type { Overlay } from '@shared/live'
 import { describeOutput, type OutputStatus } from '@shared/output'
 import type { ResolvedMode } from '../theme/tokens'
 import { EgIcon } from '../EgIcon'
-import { GearIcon, MoonIcon, SunIcon } from './Icons'
+import { GearIcon, KeyboardIcon, MonitorIcon, MoonIcon, SunIcon } from './Icons'
 
 interface TopBarProps {
   mode: ResolvedMode
@@ -33,37 +33,41 @@ export function TopBar(props: TopBarProps): React.JSX.Element {
       </div>
 
       {outputStatus && (
-        <span className={outputOk ? 'output-status' : 'output-status warn'} role="status">
+        <span className={outputOk ? 'output-status ok' : 'output-status warn'} role="status">
+          <MonitorIcon size={14} />
           {describeOutput(outputStatus)}
         </span>
       )}
 
       <div className="topbar-actions">
-        {LIVE_CONTROLS.map((control) => {
-          const active = overlay === control.overlay
-          return (
-            <button
-              key={control.overlay}
-              type="button"
-              className={active ? 'btn btn-active' : 'btn'}
-              aria-pressed={active}
-              title={`${control.hint} (${control.key}). Tekan lagi atau Esc untuk kembali.`}
-              onClick={() => onToggleOverlay(control.overlay)}
-            >
-              {control.label}
-              <kbd>{control.key}</kbd>
-            </button>
-          )
-        })}
+        <div className="live-controls" role="group" aria-label="Kontrol layar TV">
+          {LIVE_CONTROLS.map((control) => {
+            const active = overlay === control.overlay
+            return (
+              <button
+                key={control.overlay}
+                type="button"
+                className={active ? `btn live-control btn-active is-${control.overlay}` : 'btn live-control'}
+                aria-pressed={active}
+                title={`${control.hint} (${control.key}). Tekan lagi atau Esc untuk kembali.`}
+                onClick={() => onToggleOverlay(control.overlay)}
+              >
+                {control.label}
+                <kbd>{control.key}</kbd>
+              </button>
+            )
+          })}
+        </div>
         <span className="divider" aria-hidden />
-        <button type="button" className="btn" onClick={onToggleMode} title={nextLabel} aria-label={nextLabel}>
+        <button type="button" className="btn btn-ghost icon-only" onClick={onToggleMode} title={nextLabel}>
           {mode === 'dark' ? <MoonIcon /> : <SunIcon />}
-          {mode === 'dark' ? 'Gelap' : 'Terang'}
+          <span className="sr-only">{nextLabel}</span>
         </button>
-        <button type="button" className="btn icon-only" onClick={onShowHelp} title="Pintasan keyboard (F1)">
-          ?<span className="sr-only">Pintasan keyboard</span>
+        <button type="button" className="btn btn-ghost icon-only" onClick={onShowHelp} title="Pintasan keyboard (F1)">
+          <KeyboardIcon />
+          <span className="sr-only">Pintasan keyboard</span>
         </button>
-        <button type="button" className="btn icon-only" onClick={onOpenSettings} title="Pengaturan (Ctrl+,)">
+        <button type="button" className="btn btn-ghost icon-only" onClick={onOpenSettings} title="Pengaturan (Ctrl+,)">
           <GearIcon />
           <span className="sr-only">Pengaturan</span>
         </button>

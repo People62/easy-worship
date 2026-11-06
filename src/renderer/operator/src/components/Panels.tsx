@@ -1,16 +1,21 @@
+import { BookIcon, ImageIcon, MusicIcon, PaletteIcon } from './Icons'
+
 interface PanelProps {
   title: string
   live?: boolean
+  // A short status next to the title, e.g. "Black" on the Live panel.
+  badge?: string | null
   className?: string
   children: React.ReactNode
 }
 
-export function Panel({ title, live = false, className, children }: PanelProps): React.JSX.Element {
+export function Panel({ title, live = false, badge, className, children }: PanelProps): React.JSX.Element {
   return (
     <section className={['panel', live ? 'panel-live' : '', className ?? ''].join(' ')} aria-label={title}>
       <h2 className="panel-title">
         {live && <span className="live-dot" aria-hidden />}
         {title}
+        {badge && <span className="panel-badge">{badge}</span>}
       </h2>
       {children}
     </section>
@@ -22,10 +27,10 @@ export function EmptyState({ children }: { children: React.ReactNode }): React.J
 }
 
 const LIBRARY_TABS = [
-  { id: 'songs', label: 'Lagu' },
-  { id: 'bible', label: 'Alkitab' },
-  { id: 'media', label: 'Media' },
-  { id: 'themes', label: 'Tema' }
+  { id: 'songs', label: 'Lagu', Icon: MusicIcon },
+  { id: 'bible', label: 'Alkitab', Icon: BookIcon },
+  { id: 'media', label: 'Media', Icon: ImageIcon },
+  { id: 'themes', label: 'Tema', Icon: PaletteIcon }
 ] as const
 
 export type LibraryTabId = (typeof LIBRARY_TABS)[number]['id']
@@ -41,20 +46,21 @@ export function Library(props: {
   return (
     <section className="panel library" aria-label="Pustaka">
       <div className="tabs" role="tablist">
-        {LIBRARY_TABS.map((t) => (
+        {LIBRARY_TABS.map(({ id, label, Icon }) => (
           <button
-            key={t.id}
+            key={id}
             type="button"
             role="tab"
-            aria-selected={t.id === active}
-            className={t.id === active ? 'tab active' : 'tab'}
-            onClick={() => setActive(t.id)}
+            aria-selected={id === active}
+            className={id === active ? 'tab active' : 'tab'}
+            onClick={() => setActive(id)}
           >
-            {t.label}
+            <Icon />
+            {label}
           </button>
         ))}
       </div>
-      {tabs[active]}
+      <div className="library-body">{tabs[active]}</div>
     </section>
   )
 }

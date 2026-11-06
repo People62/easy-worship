@@ -14,7 +14,7 @@ import { TopBar } from './components/TopBar'
 import { BibleLibrary } from './bible/BibleLibrary'
 import { errorMessage } from './errors'
 import { Splitter } from './layout/Splitter'
-import { useLayout } from './layout/useLayout'
+import { toRem, useLayout } from './layout/useLayout'
 import { LivePanel } from './live/LivePanel'
 import { MediaLibrary } from './media/MediaLibrary'
 import { useMedia, useThemes } from './media/useMedia'
@@ -45,6 +45,8 @@ type PreviewItem = (
 // The text editor is closed, open for a new announcement, or open for the
 // schedule item at an index.
 type TextEditorState = { open: false } | { open: true; index: number | null }
+
+const OVERLAY_BADGES = { black: 'Black', clear: 'Clear', logo: 'Logo' } as const
 
 // A picture or video shown on its own: no text, the full image, not dimmed.
 function mediaSlide(item: MediaItem, base: SlideStyle): Slide {
@@ -352,8 +354,8 @@ export function App(): React.JSX.Element {
         ref={workspaceRef}
         className="workspace"
         style={{
-          gridTemplateColumns: `min(${layout.scheduleWidth}px, 35%) 8px minmax(0, ${layout.previewShare}fr) 8px minmax(0, ${1 - layout.previewShare}fr)`,
-          gridTemplateRows: `minmax(0, 1fr) 8px min(${layout.libraryHeight}px, 60%)`
+          gridTemplateColumns: `min(${toRem(layout.scheduleWidth)}, 35%) 8px minmax(0, ${layout.previewShare}fr) 8px minmax(0, ${1 - layout.previewShare}fr)`,
+          gridTemplateRows: `minmax(0, 1fr) 8px min(${toRem(layout.libraryHeight)}, 60%)`
         }}
       >
         <Panel title="Schedule" className="area-schedule">
@@ -385,7 +387,12 @@ export function App(): React.JSX.Element {
         </Panel>
         <Splitter direction="columns" label="Lebar Preview dan Live" className="area-split-2" {...splitters.preview} />
 
-        <Panel title="Live" live className="area-live">
+        <Panel
+          title="Live"
+          live
+          badge={live.overlay === 'none' ? null : OVERLAY_BADGES[live.overlay]}
+          className="area-live"
+        >
           <LivePanel live={live} />
         </Panel>
 
