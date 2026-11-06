@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { buildBibleSlides } from '@shared/bible/slides'
-import type { BiblePassage } from '@shared/ipc'
+import type { BiblePassage, MediaItem } from '@shared/ipc'
+import type { Slide, SlideStyle } from '@shared/live'
+import type { ThemeKind } from '@shared/theme'
 import { buildSongSlides } from '@shared/slides'
 import type { Song, SongSummary } from '@shared/songs'
 import { SlideRenderer } from '../../shared/SlideRenderer'
@@ -10,6 +12,9 @@ import { SettingsDialog } from './components/SettingsDialog'
 import { TopBar } from './components/TopBar'
 import { BibleLibrary } from './bible/BibleLibrary'
 import { errorMessage } from './errors'
+import { MediaLibrary } from './media/MediaLibrary'
+import { useMedia, useThemes } from './media/useMedia'
+import { ThemeLibrary } from './themes/ThemeLibrary'
 import { PreviewPanel } from './preview/PreviewPanel'
 import { SongEditorDialog } from './songs/SongEditorDialog'
 import { SongLibrary } from './songs/SongLibrary'
@@ -21,14 +26,34 @@ import { useSettings } from './useSettings'
 // The song editor is either closed, open for a new song, or open for one song.
 type EditorState = { open: false } | { open: true; song: Song | null }
 
-// What Preview shows: a song or a Bible passage.
-type PreviewItem = { kind: 'song'; song: Song } | { kind: 'bible'; passage: BiblePassage }
+// What Preview shows: a song, a Bible passage, or one image or video.
+type PreviewItem =
+  { kind: 'song'; song: Song } | { kind: 'bible'; passage: BiblePassage } | { kind: 'media'; item: MediaItem }
+
+// A picture or video shown on its own: no text, the full image, not dimmed.
+function mediaSlide(item: MediaItem, base: SlideStyle): Slide {
+  return {
+    id: `media:${item.id}`,
+    text: '',
+    label: item.name,
+    style: {
+      ...base,
+      backgroundDim: 0,
+      background:
+        item.kind === 'image'
+          ? { kind: 'image', mediaId: item.id, url: item.url }
+          : { kind: 'video', mediaId: item.id, url: item.url, posterUrl: item.thumbnailUrl }
+    }
+  }
+}
 
 export function App(): React.JSX.Element {
   const { settings, update, error } = useSettings()
   const mode = useAppearance(settings?.appearance)
   const live = useLive()
   const outputStatus = useOutputStatus()
+  const media = useMedia()
+  const themes = useThemes()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [editor, setEditor] = useState<EditorState>({ open: false })
   const [actionError, setActionError] = useState<string | null>(null)
@@ -38,13 +63,31 @@ export function App(): React.JSX.Element {
   const previewSong = preview?.kind === 'song' ? preview.song : null
   const setPreviewSong = useCallback((song: Song | null) => setPreview(song ? { kind: 'song', song } : null), [])
   const linesPerSlide = settings?.songs.linesPerSlide ?? 4
+
+  // The style of each kind of slide comes from its default theme.
+  const themeDefaults = settings?.themes
+  const styleFor = useCallback(
+    (kind: ThemeKind): SlideStyle | undefined =>
+      (themes?.find((t) => t.id === themeDefaults?.[kind]) ?? themes?.find((t) => t.kind === kind))?.style,
+    [themes, themeDefaults]
+  )
+
   const slides = useMemo(() => {
-    if (preview?.kind === 'song') return buildSongSlides(preview.song, linesPerSlide)
-    if (preview?.kind === 'bible') return buildBibleSlides(preview.passage.verses, preview.passage.abbreviation)
+    if (preview?.kind === 'song') return buildSongSlides(preview.song, linesPerSlide, styleFor('song'))
+    if (preview?.kind === 'bible') {
+      return buildBibleSlides(preview.passage.verses, preview.passage.abbreviation, styleFor('bible'))
+    }
+    if (preview?.kind === 'media' && live) return [mediaSlide(preview.item, styleFor('text') ?? live.style)]
     return []
-  }, [preview, linesPerSlide])
+  }, [preview, linesPerSlide, styleFor, live])
   const previewTitle =
-    preview?.kind === 'song' ? preview.song.title : preview?.kind === 'bible' ? preview.passage.title : null
+    preview?.kind === 'song'
+      ? preview.song.title
+      : preview?.kind === 'bible'
+        ? preview.passage.title
+        : preview?.kind === 'media'
+          ? preview.item.name
+          : null
   const safeIndex = Math.min(selectedIndex, Math.max(0, slides.length - 1))
 
   const run = useCallback(async (action: () => Promise<unknown>): Promise<void> => {
@@ -164,30 +207,53 @@ export function App(): React.JSX.Element {
         </Panel>
 
         <Library
-          bible={
-            <BibleLibrary
-              versionId={settings.bible.versionId}
-              onVersionChange={(versionId) => void update({ bible: { versionId } })}
-              onOpenPassage={(passage) => {
-                setPreview({ kind: 'bible', passage })
-                setSelectedIndex(0)
-              }}
-            />
-          }
-          songs={
-            <SongLibrary
-              selectedId={previewSong?.id ?? null}
-              onSelect={(song) => void openSong(song.id)}
-              onCreate={() => setEditor({ open: true, song: null })}
-              onEdit={(id) =>
-                void run(async () => {
-                  const song = await window.api.songs.get(id)
-                  if (song) setEditor({ open: true, song })
-                })
-              }
-              onDelete={deleteSong}
-            />
-          }
+          tabs={{
+            media: (
+              <MediaLibrary
+                items={media}
+                selectedId={preview?.kind === 'media' ? preview.item.id : null}
+                onSelect={(item) => {
+                  setPreview({ kind: 'media', item })
+                  setSelectedIndex(0)
+                }}
+              />
+            ),
+            themes:
+              themes && media ? (
+                <ThemeLibrary
+                  themes={themes}
+                  media={media}
+                  defaults={settings.themes}
+                  onSetDefault={(patch) => void update({ themes: patch })}
+                />
+              ) : (
+                <EmptyState>Memuat…</EmptyState>
+              ),
+            bible: (
+              <BibleLibrary
+                versionId={settings.bible.versionId}
+                onVersionChange={(versionId) => void update({ bible: { versionId } })}
+                onOpenPassage={(passage) => {
+                  setPreview({ kind: 'bible', passage })
+                  setSelectedIndex(0)
+                }}
+              />
+            ),
+            songs: (
+              <SongLibrary
+                selectedId={previewSong?.id ?? null}
+                onSelect={(song) => void openSong(song.id)}
+                onCreate={() => setEditor({ open: true, song: null })}
+                onEdit={(id) =>
+                  void run(async () => {
+                    const song = await window.api.songs.get(id)
+                    if (song) setEditor({ open: true, song })
+                  })
+                }
+                onDelete={deleteSong}
+              />
+            )
+          }}
         />
       </main>
 

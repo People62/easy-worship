@@ -23,19 +23,17 @@ export function EmptyState({ children }: { children: React.ReactNode }): React.J
 }
 
 const LIBRARY_TABS = [
-  { id: 'songs', label: 'Lagu', empty: '' },
-  { id: 'bible', label: 'Alkitab', empty: '' },
-  { id: 'media', label: 'Media', empty: 'Belum ada media. Tersedia di Tahap 5.' },
-  { id: 'themes', label: 'Tema', empty: 'Belum ada tema. Tersedia di Tahap 5.' }
+  { id: 'songs', label: 'Lagu' },
+  { id: 'bible', label: 'Alkitab' },
+  { id: 'media', label: 'Media' },
+  { id: 'themes', label: 'Tema' }
 ] as const
 
-type LibraryTabId = (typeof LIBRARY_TABS)[number]['id']
+export type LibraryTabId = (typeof LIBRARY_TABS)[number]['id']
 
-// The bottom panel. Each tab shows its own content; tabs that are not built
-// yet show which phase brings them.
-export function Library({ songs, bible }: { songs: React.ReactNode; bible: React.ReactNode }): React.JSX.Element {
+// The bottom panel with one tab per kind of content.
+export function Library({ tabs }: { tabs: Record<LibraryTabId, React.ReactNode> }): React.JSX.Element {
   const [active, setActive] = useState<LibraryTabId>('songs')
-  const tab = LIBRARY_TABS.find((t) => t.id === active) ?? LIBRARY_TABS[0]
 
   return (
     <section className="panel library" aria-label="Pustaka">
@@ -53,7 +51,7 @@ export function Library({ songs, bible }: { songs: React.ReactNode; bible: React
           </button>
         ))}
       </div>
-      {tab.id === 'songs' ? songs : tab.id === 'bible' ? bible : <EmptyState>{tab.empty}</EmptyState>}
+      {tabs[active]}
     </section>
   )
 }

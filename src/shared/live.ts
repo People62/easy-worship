@@ -1,7 +1,12 @@
 // What the congregation sees. The main process owns one LiveState and sends
 // it to every window, so the Live panel and the TVs always show the same thing.
 
-export type Background = { kind: 'color'; color: string }
+// The slide background. Image and video carry the media id (what is saved)
+// and the URLs to show (filled in by the main process).
+export type Background =
+  | { kind: 'color'; color: string }
+  | { kind: 'image'; mediaId: number; url: string }
+  | { kind: 'video'; mediaId: number; url: string; posterUrl: string | null }
 
 export interface Slide {
   id: string
@@ -10,23 +15,27 @@ export interface Slide {
   label?: string
   // Small line under the text on the TV, e.g. "Yohanes 3:16 (TB)".
   caption?: string
-  // Per-slide overrides of the style: Bible text is not shown in capitals
-  // and uses a slightly smaller font than song lyrics.
-  uppercase?: boolean
-  fontScale?: number
-  background?: Background
+  // The theme style this slide is shown with. Without it the default is used.
+  style?: SlideStyle
 }
 
 export interface SlideStyle {
   fontFamily: string
-  // Font size in pixels on the 1920×1080 canvas.
+  // Sizes and margins are in pixels on the 1920×1080 canvas.
   fontSize: number
   lineHeight: number
   color: string
   uppercase: boolean
   align: 'left' | 'center' | 'right'
   shadow: boolean
+  // Text outline; 0 = none.
+  outlineWidth: number
+  outlineColor: string
+  // Space between the text and the edge of the screen.
+  margin: number
   background: Background
+  // Darkens an image or video behind the text so it stays readable (0–0.8).
+  backgroundDim: number
 }
 
 // black: whole screen black. clear: hide the text, keep the background.
@@ -51,7 +60,11 @@ export const DEFAULT_SLIDE_STYLE: SlideStyle = {
   uppercase: true,
   align: 'center',
   shadow: true,
-  background: { kind: 'color', color: '#000000' }
+  outlineWidth: 0,
+  outlineColor: '#000000',
+  margin: 120,
+  background: { kind: 'color', color: '#000000' },
+  backgroundDim: 0.35
 }
 
 export const INITIAL_LIVE_STATE: LiveState = {

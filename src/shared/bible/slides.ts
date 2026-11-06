@@ -1,4 +1,4 @@
-import type { Slide } from '../live'
+import type { Slide, SlideStyle } from '../live'
 import { formatReference, verseLabel, type BibleReference } from './reference'
 
 export interface BibleVerse {
@@ -45,7 +45,7 @@ export function splitVerseText(text: string, maxChars = MAX_VERSE_CHARS): string
 
 // One slide per verse (or per part of a long verse). The caption shows the
 // verse and translation; the operator label is the short reference.
-export function buildBibleSlides(verses: BibleVerse[], versionAbbreviation: string): Slide[] {
+export function buildBibleSlides(verses: BibleVerse[], versionAbbreviation: string, style?: SlideStyle): Slide[] {
   return verses.flatMap((v) => {
     const parts = splitVerseText(v.text)
     const caption = `${verseLabel(v.book, v.chapter, v.verse, false)} (${versionAbbreviation})`
@@ -54,8 +54,7 @@ export function buildBibleSlides(verses: BibleVerse[], versionAbbreviation: stri
       text,
       caption,
       label: `${verseLabel(v.book, v.chapter, v.verse)}${parts.length > 1 ? ` (${part + 1}/${parts.length})` : ''}`,
-      uppercase: false,
-      fontScale: 0.8
+      ...(style ? { style } : {})
     }))
   })
 }
