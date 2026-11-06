@@ -31,7 +31,10 @@ const CONTENT_TYPES: Record<string, string> = {
 
 export function registerEgwScheme(): void {
   protocol.registerSchemesAsPrivileged([
-    { scheme: 'egw', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }
+    {
+      scheme: 'egw',
+      privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, corsEnabled: true }
+    }
   ])
 }
 
@@ -81,7 +84,10 @@ export async function serveFile(file: string, rangeHeader: string | null): Promi
     'Content-Type': type,
     'Content-Length': String(end - start + 1),
     'Accept-Ranges': 'bytes',
-    'Cache-Control': 'no-cache'
+    'Cache-Control': 'no-cache',
+    // Lets the operator window draw media onto a canvas to make thumbnails.
+    // Only our own windows can load egw:// at all.
+    'Access-Control-Allow-Origin': '*'
   }
   if (range) headers['Content-Range'] = `bytes ${start}-${end}/${info.size}`
   return new Response(body, { status: range ? 206 : 200, headers })

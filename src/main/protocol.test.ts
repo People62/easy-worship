@@ -63,6 +63,7 @@ describe('serveFile', () => {
     const response = await serveFile(file, null)
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toBe('video/mp4')
+    expect(response.headers.get('access-control-allow-origin')).toBe('*')
     expect(await response.text()).toBe('0123456789')
   })
 
