@@ -108,11 +108,23 @@ Catatan: pindah slide di Live dengan satu tombol (tanpa Enter tiap slide) dikerj
 
 ### Tahap 4 · Alkitab (S)
 
-- [ ] Importer Zefania XML dan OSIS.
-- [ ] Parser referensi: `yoh 3:16-18`, `mzm 23`, `1 kor 13:4` (nama Indonesia + Inggris) + unit test.
-- [ ] Pemecah ayat panjang menjadi beberapa slide.
+- [x] Importer Zefania XML, OSIS (termasuk ayat model milestone), dan OpenSong.
+- [x] Parser referensi: `yoh 3:16-18`, `mzm 23`, `1 kor 13:4`, `kej 1:31-2:3`, `yoh 3:16, 18` (nama Indonesia + Inggris) + unit test.
+- [x] Pemecah ayat panjang menjadi beberapa slide (di akhir kalimat atau koma).
 
 **Selesai bila:** file TB milik sendiri berhasil diimpor dan `yoh 3:16` langsung tampil.
+
+Sudah diuji dengan contoh KJV (domain publik). Uji dengan file TB menunggu file yang sah.
+
+**Cara mendapatkan file Alkitab**
+
+| Format | Ciri file | Contoh sumber |
+| --- | --- | --- |
+| Zefania XML | Berawal `<XMLBIBLE>` | Modul Zefania (banyak terjemahan, termasuk domain publik) |
+| OSIS | Berawal `<osis>` | Proyek CrossWire/SWORD, eBible.org |
+| OpenSong | Berawal `<bible>` dengan `<b>`, `<c>`, `<v>` | Kumpulan Alkitab OpenSong |
+
+Terjemahan Baru (TB) milik LAI dan berhak cipta. Untuk pemakaian gereja, gunakan file dari sumber yang sah atau minta izin LAI. File Alkitab tidak boleh di-commit ke repo (lihat GIT-WORKFLOW.md bagian 5).
 
 ### Tahap 5 · Media dan tema (S)
 
