@@ -1,0 +1,52 @@
+name: CI
+
+# Runs on every push to any branch. Commit messages are checked in commitlint.yml.
+on:
+  push:
+    branches: ['**']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder --win
+      - uses: actions/upload-artifact@v7
+        with:
+          name: el-gibbor-worship-setup-${{ github.sha }}
+          path: release/*/*-setup.exe
+          retention-days: 7
+      - uses: actions/upload-artifact@v7
+        with:
+          name: el-gibbor-worship-portable-${{ github.sha }}
+          path: release/*/win-unpacked
+          retention-days: 7

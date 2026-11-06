@@ -70,12 +70,13 @@ docs: add church laptop test results
 
 ## 3. CI: berjalan di setiap push
 
-File: `.github/workflows/ci.yml`. Berjalan saat **push ke branch mana pun** dan saat **pull request ke `main`**.
+File: `.github/workflows/ci.yml` (`check`, `build-windows`) berjalan di **setiap push ke branch mana pun**. File `.github/workflows/commitlint.yml` berjalan di **pull request ke `main`**, karena di situ rentang commit-nya jelas.
 
 | Job | Runner | Langkah | Gagal bila |
 | --- | --- | --- | --- |
 | `check` | ubuntu-latest | `npm ci` → `lint` → `typecheck` → `test` (Vitest) | Ada error lint, error tipe, atau test gagal |
-| `build-windows` | windows-latest | `npm ci` → `build` → `electron-builder --dir` (tanpa installer) | Aplikasi tidak bisa di-build di Windows, misalnya modul SQLite gagal |
+| `build-windows` | windows-latest | `npm ci` → `build` → `electron-builder --win` → simpan installer + versi portable sebagai artifact (7 hari) | Aplikasi tidak bisa di-build di Windows, misalnya modul SQLite gagal |
+| `commitlint` | ubuntu-latest | Cek semua pesan commit di PR | Ada commit yang tidak mengikuti format bagian 2 |
 
 - Kedua job berjalan bersamaan. Target waktu < 10 menit.
 - Push baru ke branch yang sama membatalkan CI lama yang masih berjalan (`concurrency`).
@@ -85,7 +86,7 @@ File: `.github/workflows/ci.yml`. Berjalan saat **push ke branch mana pun** dan 
 **Aturan proteksi `main`** (diatur di GitHub → Settings → Branches):
 
 - [ ] Wajib lewat pull request.
-- [ ] Wajib lulus `check` dan `build-windows`.
+- [ ] Wajib lulus `check`, `build-windows`, dan `commitlint`.
 - [ ] Branch harus up to date dengan `main` sebelum merge.
 
 ## 4. Rilis
@@ -140,7 +141,7 @@ Disetujui 2026-11-06.
 | --- | --- |
 | `.gitattributes` | Semua file teks memakai akhir baris LF |
 | Versi Node | Node 24 LTS (`.nvmrc` + `engines`), package manager npm, `package-lock.json` di-commit |
-| Hasil build per PR | CI menyimpan build Windows portable sebagai artifact selama 7 hari |
+| Hasil build per push | CI menyimpan installer Windows dan versi portable sebagai artifact selama 7 hari |
 | Cek format commit | commitlint (Conventional Commits) dijalankan di CI |
 | Template PR | Tujuan, cara mencoba, screenshot, checklist uji Windows |
 | Template issue | "Laporan bug ibadah" dan "Permintaan fitur" |
