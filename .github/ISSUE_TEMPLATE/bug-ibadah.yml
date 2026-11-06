@@ -1,0 +1,45 @@
+name: Laporan bug ibadah
+description: Masalah yang terjadi saat memakai aplikasi, terutama saat ibadah
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Apa yang terjadi?
+      placeholder: Contoh - saat menekan Enter, TV menampilkan layar hitam
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: Kapan terjadi?
+      placeholder: Contoh - ibadah Minggu 8 Nov, sekitar menit ke-40, saat lagu ke-3
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah sebelum masalah muncul
+      placeholder: |
+        1. Buka schedule ...
+        2. Pilih lagu ...
+        3. Tekan ...
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Seberapa mengganggu?
+      options:
+        - Ibadah terhenti / jemaat melihat masalahnya
+        - Operator kerepotan, jemaat tidak sadar
+        - Kecil, bisa ditunda
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versi aplikasi
+      placeholder: Lihat menu Tentang aplikasi, contoh v0.9.0
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot atau foto layar

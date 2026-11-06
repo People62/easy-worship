@@ -1,0 +1,15 @@
+name: Permintaan fitur
+description: Usulan fitur atau perubahan
+labels: [feature]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Apa yang dibutuhkan?
+      placeholder: Contoh - bisa menampilkan dua terjemahan Alkitab sekaligus
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Kenapa dibutuhkan? Dipakai di bagian ibadah mana?
