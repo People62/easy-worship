@@ -12,12 +12,14 @@ describe('normalizeSettings', () => {
     const result = normalizeSettings({
       appearance: { mode: 'light', primary: '#2563eb' },
       output: { displayId: 7, windowed: true },
-      church: { logoFile: 'logo.png' }
+      church: { logoFile: 'logo.png' },
+      songs: { linesPerSlide: 2 }
     })
     expect(result).toEqual({
       appearance: { mode: 'light', primary: '#2563EB' },
       output: { displayId: 7, windowed: true },
-      church: { logoFile: 'logo.png' }
+      church: { logoFile: 'logo.png' },
+      songs: { linesPerSlide: 2 }
     })
   })
 
@@ -30,7 +32,7 @@ describe('normalizeSettings', () => {
 
   it('drops unknown keys', () => {
     const result = normalizeSettings({ appearance: { mode: 'dark', extra: true }, other: 1 })
-    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church'])
+    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs'])
     expect(Object.keys(result.appearance)).toEqual(['mode', 'primary'])
   })
 })
@@ -78,6 +80,15 @@ describe('logo file', () => {
     expect(next.output.windowed).toBe(true)
     expect(applySettingsPatch(next, { church: { logoFile: null } }).church.logoFile).toBeNull()
     expect(() => applySettingsPatch(next, { church: { logoFile: 'a/b.png' } })).toThrow('Invalid logo')
+  })
+})
+
+describe('lines per slide', () => {
+  it('defaults to 4 and rejects values outside 1–12', () => {
+    expect(DEFAULT_SETTINGS.songs.linesPerSlide).toBe(4)
+    expect(normalizeSettings({ songs: { linesPerSlide: 40 } }).songs.linesPerSlide).toBe(4)
+    expect(applySettingsPatch(DEFAULT_SETTINGS, { songs: { linesPerSlide: 6 } }).songs.linesPerSlide).toBe(6)
+    expect(() => applySettingsPatch(DEFAULT_SETTINGS, { songs: { linesPerSlide: 0 } })).toThrow('Baris per slide')
   })
 })
 

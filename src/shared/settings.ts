@@ -1,4 +1,5 @@
 import { isHexColor, normalizeHex } from './color'
+import { DEFAULT_LINES_PER_SLIDE, MAX_LINES_PER_SLIDE, MIN_LINES_PER_SLIDE } from './slides'
 
 export type ThemeMode = 'dark' | 'light' | 'system'
 
@@ -18,12 +19,17 @@ export interface AppSettings {
     // File name of the church logo inside the app's user data folder.
     logoFile: string | null
   }
+  songs: {
+    // Lines of lyrics per slide before a part is split over more slides.
+    linesPerSlide: number
+  }
 }
 
 export type SettingsPatch = {
   appearance?: Partial<AppSettings['appearance']>
   output?: Partial<AppSettings['output']>
   church?: Partial<AppSettings['church']>
+  songs?: Partial<AppSettings['songs']>
 }
 
 export const DEFAULT_PRIMARY = '#D4A017'
@@ -31,7 +37,8 @@ export const DEFAULT_PRIMARY = '#D4A017'
 export const DEFAULT_SETTINGS: AppSettings = {
   appearance: { mode: 'dark', primary: DEFAULT_PRIMARY },
   output: { displayId: null, windowed: false },
-  church: { logoFile: null }
+  church: { logoFile: null },
+  songs: { linesPerSlide: DEFAULT_LINES_PER_SLIDE }
 }
 
 export const PRIMARY_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
@@ -65,6 +72,10 @@ function isLogoFile(value: unknown): value is string | null {
   return value === null || isLogoFileName(value)
 }
 
+function isLinesPerSlide(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= MIN_LINES_PER_SLIDE && (value as number) <= MAX_LINES_PER_SLIDE
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 }
@@ -77,6 +88,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const appearance = asRecord(root.appearance)
   const output = asRecord(root.output)
   const church = asRecord(root.church)
+  const songs = asRecord(root.songs)
 
   return {
     appearance: {
@@ -89,6 +101,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
     },
     church: {
       logoFile: isLogoFile(church.logoFile) ? church.logoFile : DEFAULT_SETTINGS.church.logoFile
+    },
+    songs: {
+      linesPerSlide: isLinesPerSlide(songs.linesPerSlide) ? songs.linesPerSlide : DEFAULT_SETTINGS.songs.linesPerSlide
     }
   }
 }
@@ -99,7 +114,8 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
   const next: AppSettings = {
     appearance: { ...current.appearance },
     output: { ...current.output },
-    church: { ...current.church }
+    church: { ...current.church },
+    songs: { ...current.songs }
   }
 
   if (patch.appearance?.mode !== undefined) {
@@ -121,6 +137,12 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
   if (patch.church?.logoFile !== undefined) {
     if (!isLogoFile(patch.church.logoFile)) throw new Error(`Invalid logo file: ${String(patch.church.logoFile)}`)
     next.church.logoFile = patch.church.logoFile
+  }
+  if (patch.songs?.linesPerSlide !== undefined) {
+    if (!isLinesPerSlide(patch.songs.linesPerSlide)) {
+      throw new Error(`Baris per slide harus ${MIN_LINES_PER_SLIDE}–${MAX_LINES_PER_SLIDE}.`)
+    }
+    next.songs.linesPerSlide = patch.songs.linesPerSlide
   }
 
   return next
