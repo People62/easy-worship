@@ -15,7 +15,8 @@ describe('normalizeSettings', () => {
       church: { logoFile: 'logo.png' },
       songs: { linesPerSlide: 2 },
       bible: { versionId: 3 },
-      themes: { song: 1, bible: 2, text: null }
+      themes: { song: 1, bible: 2, text: null },
+      layout: { scheduleWidth: 300, previewShare: 0.6, libraryHeight: 240 }
     })
     expect(result).toEqual({
       appearance: { mode: 'light', primary: '#2563EB' },
@@ -23,7 +24,8 @@ describe('normalizeSettings', () => {
       church: { logoFile: 'logo.png' },
       songs: { linesPerSlide: 2 },
       bible: { versionId: 3 },
-      themes: { song: 1, bible: 2, text: null }
+      themes: { song: 1, bible: 2, text: null },
+      layout: { scheduleWidth: 300, previewShare: 0.6, libraryHeight: 240 }
     })
   })
 
@@ -36,7 +38,7 @@ describe('normalizeSettings', () => {
 
   it('drops unknown keys', () => {
     const result = normalizeSettings({ appearance: { mode: 'dark', extra: true }, other: 1 })
-    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs', 'bible', 'themes'])
+    expect(Object.keys(result)).toEqual(['appearance', 'output', 'church', 'songs', 'bible', 'themes', 'layout'])
     expect(Object.keys(result.appearance)).toEqual(['mode', 'primary'])
   })
 })
@@ -100,5 +102,21 @@ describe('PRIMARY_PRESETS', () => {
   it('has 8 presets with gold first', () => {
     expect(PRIMARY_PRESETS).toHaveLength(8)
     expect(PRIMARY_PRESETS[0].value).toBe(DEFAULT_SETTINGS.appearance.primary)
+  })
+})
+
+describe('panel layout', () => {
+  it('clamps dragged sizes into their limits', () => {
+    const next = applySettingsPatch(DEFAULT_SETTINGS, { layout: { scheduleWidth: 5000, previewShare: 0.1 } })
+    expect(next.layout).toEqual({ scheduleWidth: 560, previewShare: 0.25, libraryHeight: 280 })
+  })
+
+  it('rejects sizes that are not numbers', () => {
+    expect(() => applySettingsPatch(DEFAULT_SETTINGS, { layout: { libraryHeight: Number.NaN } })).toThrow()
+  })
+
+  it('repairs damaged stored sizes', () => {
+    const settings = normalizeSettings({ layout: { scheduleWidth: 'wide', libraryHeight: 50 } })
+    expect(settings.layout).toEqual({ scheduleWidth: 260, previewShare: 0.5, libraryHeight: 160 })
   })
 })
