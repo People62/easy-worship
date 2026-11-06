@@ -2,6 +2,17 @@
 
 Panduan singkat agar tampilan jendela operator tetap konsisten. Berlaku sejak Tahap 6.5.
 
+## 0. Prinsip: minimalis
+
+Disepakati setelah uji di Windows (Tahap 6.5): tampilan minimalis.
+
+- Area dipisahkan oleh ruang kosong dan garis tipis, bukan kotak berbingkai. Panel tidak punya latar sendiri.
+- Warna netral. Emas (warna primer) hanya untuk: Live, pilihan aktif, satu tombol utama per area, dan Simpan saat ada perubahan.
+- Tombol biasa bergaris tipis tanpa isi. Hanya tombol utama yang berwarna penuh.
+- Ikon satu warna (redup); berubah emas saat item terpilih atau sedang tampil.
+- Live ditandai label "● LIVE" dan cincin emas di sekeliling slide, bukan seluruh panel.
+- Informasi yang membantu saat ibadah tetap terlihat: slide berikutnya ("berikutnya: Verse 2") dan posisi slide (2/5).
+
 ## 1. Token tiga lapis
 
 | Lapis | Isi | Tempat |

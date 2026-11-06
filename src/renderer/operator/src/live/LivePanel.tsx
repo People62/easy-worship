@@ -16,6 +16,8 @@ function overlayNote(overlay: 'black' | 'clear' | 'logo'): string {
 export function LivePanel({ live }: { live: LiveState }): React.JSX.Element {
   const deck = live.deck
   const count = deck?.slides.length ?? 0
+  // What the next press of the clicker will show.
+  const next = deck?.slides[live.index + 1] ?? null
 
   return (
     <div className="deck">
@@ -24,7 +26,10 @@ export function LivePanel({ live }: { live: LiveState }): React.JSX.Element {
           <strong title={deck?.title}>{deck?.title || (live.slide ? 'Live' : t('Live kosong'))}</strong>
           <span className="deck-meta">
             {count > 0
-              ? `${live.slide?.label ?? ''} · ${live.index + 1}/${count}`
+              ? [
+                  `${live.slide?.label ?? ''} · ${live.index + 1}/${count}`,
+                  next ? t('berikutnya: {label}', { label: next.label ?? `${live.index + 2}` }) : t('slide terakhir')
+                ].join(' · ')
               : t('Tekan Enter untuk mengirim Preview')}
           </span>
         </div>

@@ -168,6 +168,8 @@ export const EN = {
   'Teks disembunyikan. Tekan F6 atau Esc untuk kembali.': 'Text is hidden. Press F6 or Esc to go back.',
   'Logo tampil. Tekan F7 atau Esc untuk kembali.': 'Logo is showing. Press F7 or Esc to go back.',
   'Live kosong': 'Live is empty',
+  'berikutnya: {label}': 'next: {label}',
+  'slide terakhir': 'last slide',
   'Tekan Enter untuk mengirim Preview': 'Press Enter to send the Preview',
   'Slide sebelumnya (panah kiri, Page Up)': 'Previous slide (left arrow, Page Up)',
   Sebelumnya: 'Previous',

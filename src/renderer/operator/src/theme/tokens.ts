@@ -51,10 +51,10 @@ const SEMANTIC: Record<ResolvedMode, Record<string, string>> = {
     '--warning': PALETTE.orange400
   },
   light: {
-    '--bg': PALETTE.stone150,
+    '--bg': PALETTE.white,
     '--surface': PALETTE.white,
     '--surface-2': PALETTE.stone100,
-    '--surface-hover': PALETTE.stone200,
+    '--surface-hover': PALETTE.stone150,
     '--border': PALETTE.stone200,
     '--border-strong': PALETTE.stone300,
     '--fg': PALETTE.ink,

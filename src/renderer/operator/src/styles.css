@@ -95,8 +95,9 @@
   --control-h: 2.125rem;
   --control-h-sm: 1.75rem;
 
-  --btn-bg: var(--surface-2);
-  --btn-bg-hover: var(--surface-hover);
+  /* Minimal: controls are outlined, not filled; only the primary action is solid. */
+  --btn-bg: transparent;
+  --btn-bg-hover: var(--surface-2);
   --btn-border: var(--border);
   --btn-border-hover: var(--border-strong);
   --btn-fg: var(--fg);
@@ -107,14 +108,15 @@
   --field-border: var(--border);
   --field-radius: var(--radius-md);
 
-  --panel-bg: var(--surface);
-  --panel-border: var(--border);
-  --panel-radius: var(--radius-lg);
-  --panel-pad: var(--space-3);
-  --panel-gap: var(--space-2);
+  /* Panels are open areas divided by hairlines, not boxed cards. */
+  --panel-bg: transparent;
+  --panel-border: transparent;
+  --panel-radius: 0;
+  --panel-pad: var(--space-3) var(--space-4);
+  --panel-gap: var(--space-3);
 
-  --row-bg: var(--surface-2);
-  --row-bg-hover: var(--surface-hover);
+  --row-bg: transparent;
+  --row-bg-hover: var(--surface-2);
   --row-radius: var(--radius-md);
 
   --thumb-min: 8.5rem;
@@ -521,7 +523,6 @@ input[type='range'] {
   display: grid;
   /* Column and row sizes are set inline from the saved panel layout. */
   min-height: 0;
-  padding: var(--space-2);
 }
 
 .area-schedule {
@@ -558,12 +559,30 @@ input[type='range'] {
   outline: none;
 }
 
+.splitter::before,
 .splitter::after {
   content: '';
   position: absolute;
   border-radius: var(--radius-full);
-  background: transparent;
   transition: background var(--duration-fast);
+}
+
+/* The hairline that is always visible. */
+.splitter::before {
+  background: var(--border);
+}
+
+/* The thicker handle that appears on hover and focus. */
+.splitter::after {
+  background: transparent;
+}
+
+.splitter-columns::before {
+  inset: var(--space-3) calc(50% - 0.5px);
+}
+
+.splitter-rows::before {
+  inset: calc(50% - 0.5px) 0;
 }
 
 .splitter-columns {
@@ -584,7 +603,7 @@ input[type='range'] {
 
 .splitter:hover::after,
 .splitter:active::after {
-  background: var(--border-strong);
+  background: var(--primary);
 }
 
 .splitter:focus-visible {
@@ -600,9 +619,9 @@ input[type='range'] {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--bg);
 }
 
 .brand {
@@ -625,13 +644,16 @@ input[type='range'] {
   font-weight: var(--weight-semibold);
 }
 
-.output-status.ok {
-  background: var(--tint-success);
+.output-status {
+  color: var(--muted);
+  font-weight: var(--weight-medium);
+}
+
+.output-status.ok svg {
   color: var(--success);
 }
 
 .output-status.warn {
-  background: var(--tint-warning);
   color: var(--warning);
 }
 
@@ -671,9 +693,10 @@ input[type='range'] {
   background: var(--panel-bg);
 }
 
-.panel-live {
-  border: 2px solid var(--primary);
-  box-shadow: 0 0 0 4px var(--tint-primary);
+/* Live is marked by its label and a gold ring around the slide only. */
+.panel-live .stage .slide-frame {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 .panel-title {
@@ -681,10 +704,10 @@ input[type='range'] {
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
-  color: var(--muted);
+  color: var(--subtle);
   font-size: var(--text-2xs);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.08em;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -768,8 +791,8 @@ input[type='range'] {
   overflow: hidden;
   aspect-ratio: 16 / 9;
   width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   background: var(--slide-bg);
 }
 
@@ -815,8 +838,8 @@ input[type='range'] {
   border-color: var(--primary);
 }
 
-.slide-thumb.is-live {
-  background: var(--tint-primary);
+.slide-thumb.is-live .thumb-frame {
+  box-shadow: 0 0 0 2px var(--primary);
 }
 
 .thumb-frame {
@@ -834,7 +857,7 @@ input[type='range'] {
   overflow: hidden;
   color: var(--muted);
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
 }
 
@@ -845,11 +868,11 @@ input[type='range'] {
 .live-note {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--tint-primary);
+  border-left: 2px solid var(--primary);
+  border-radius: 0;
   color: var(--primary-text);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .draggable {
@@ -905,7 +928,6 @@ input[type='range'] {
 
 .schedule-actions {
   padding-top: var(--space-2);
-  border-top: 1px solid var(--border);
 }
 
 .recent-schedules {
@@ -986,11 +1008,13 @@ input[type='range'] {
 }
 
 .schedule-row.selected {
-  border-color: var(--primary);
+  background: var(--surface-2);
+  box-shadow: inset 2px 0 0 var(--primary);
 }
 
-.schedule-row.is-live {
-  background: var(--tint-primary);
+.schedule-row.is-live .schedule-title {
+  color: var(--primary-text);
+  font-weight: var(--weight-semibold);
 }
 
 .schedule-title {
@@ -1001,44 +1025,18 @@ input[type='range'] {
 }
 
 /* Each kind of item has its own color, so a long schedule is easy to scan. */
+/* One quiet icon per kind; color is kept for Live and the selection. */
 .kind-mark {
-  --kind: var(--muted);
   display: grid;
   flex-shrink: 0;
   place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--kind) 18%, transparent);
-  color: var(--kind);
+  width: 1.25rem;
+  color: var(--subtle);
 }
 
-.kind-song {
-  --kind: var(--primary-text);
-}
-
-.kind-bible {
-  --kind: #60a5fa;
-}
-
-.kind-media {
-  --kind: #34d399;
-}
-
-.kind-text {
-  --kind: #c084fc;
-}
-
-:root[data-theme='light'] .kind-bible {
-  --kind: #1d4ed8;
-}
-
-:root[data-theme='light'] .kind-media {
-  --kind: #047857;
-}
-
-:root[data-theme='light'] .kind-text {
-  --kind: #7e22ce;
+.schedule-row.selected .kind-mark,
+.schedule-row.is-live .kind-mark {
+  color: var(--primary-text);
 }
 
 .schedule-empty {
@@ -1137,7 +1135,8 @@ input[type='range'] {
 }
 
 .song-list {
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 0 var(--space-4);
 }
 
 .song-row {
@@ -1158,8 +1157,13 @@ input[type='range'] {
   background: var(--row-bg-hover);
 }
 
+.song-row {
+  border-radius: var(--radius-sm);
+}
+
 .song-row.selected {
-  border-color: var(--primary);
+  background: var(--surface-2);
+  box-shadow: inset 2px 0 0 var(--primary);
 }
 
 .song-title {
@@ -1168,6 +1172,21 @@ input[type='range'] {
   font-weight: var(--weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Two lines per song: the title, then "first line · author". */
+.song-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-1);
+}
+
+.song-row .song-title {
+  grid-column: 1 / -1;
+}
+
+.song-author::before {
+  content: '· ';
 }
 
 .song-first-line,
@@ -1269,9 +1288,14 @@ input[type='range'] {
   background: var(--row-bg-hover);
 }
 
-.media-card.selected,
-.theme-card.is-default {
-  border-color: var(--primary);
+.media-card.selected .media-thumb,
+.theme-card.is-default .thumb-frame {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.media-card,
+.theme-card {
+  border: 0;
 }
 
 .media-thumb {
