@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+release/
+*.tsbuildinfo
+
+# Logs and caches
+*.log
+npm-debug.log*
+.eslintcache
+coverage/
+.vite/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Copyrighted church content: never commit (see docs/GIT-WORKFLOW.md section 5)
+*.sqlite
+*.sqlite3
+*.db
+*.DB
+*.mb
+*.MB
+*.ewb
+*.egw
+/data/
+/bibles/
+/songs/
+/media/
+/resources/church/
