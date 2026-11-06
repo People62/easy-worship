@@ -61,6 +61,21 @@ const api = {
     getPassage: (...args: InvokeContract['bible:get-passage']['args']) => invoke('bible:get-passage', ...args),
     onVersionsChanged: (listener: (versions: EventContract['bible:versions-changed']) => void) =>
       on('bible:versions-changed', listener)
+  },
+  media: {
+    list: () => invoke('media:list'),
+    importFiles: () => invoke('media:import'),
+    setInfo: (...args: InvokeContract['media:set-info']['args']) => invoke('media:set-info', ...args),
+    rename: (...args: InvokeContract['media:rename']['args']) => invoke('media:rename', ...args),
+    delete: (...args: InvokeContract['media:delete']['args']) => invoke('media:delete', ...args),
+    onChanged: (listener: (items: EventContract['media:changed']) => void) => on('media:changed', listener)
+  },
+  themes: {
+    list: () => invoke('themes:list'),
+    create: (...args: InvokeContract['themes:create']['args']) => invoke('themes:create', ...args),
+    update: (...args: InvokeContract['themes:update']['args']) => invoke('themes:update', ...args),
+    delete: (...args: InvokeContract['themes:delete']['args']) => invoke('themes:delete', ...args),
+    onChanged: (listener: (themes: EventContract['themes:changed']) => void) => on('themes:changed', listener)
   }
 }
 

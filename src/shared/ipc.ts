@@ -3,6 +3,7 @@ import type { LiveState, Overlay, Slide } from './live'
 import type { OutputStatus } from './output'
 import type { AppSettings, SettingsPatch } from './settings'
 import type { Song, SongInput, SongSummary } from './songs'
+import type { MediaRef, Theme, ThemeInput } from './theme'
 
 // The single list of IPC calls between the windows and the main process.
 // Main must register a handler for every entry (checked by TypeScript in
@@ -40,6 +41,27 @@ export interface BibleImportResult {
   skippedBooks: number
 }
 
+export interface MediaItem extends MediaRef {
+  name: string
+  width: number | null
+  height: number | null
+  durationMs: number | null
+  sizeBytes: number
+}
+
+export interface MediaInfo {
+  width: number
+  height: number
+  durationMs: number | null
+  // "data:image/jpeg;base64,…", made by the renderer from the image or video.
+  thumbnail: string
+}
+
+export interface MediaImportResult {
+  imported: MediaItem[]
+  failed: { file: string; error: string }[]
+}
+
 export interface DisplayInfo {
   id: number
   label: string
@@ -74,6 +96,16 @@ export interface InvokeContract {
   'bible:delete-version': { args: [id: number]; result: void }
   // Parses the typed reference in main, so the same rules apply everywhere.
   'bible:get-passage': { args: [versionId: number, query: string]; result: BiblePassage }
+  'media:list': { args: []; result: MediaItem[] }
+  // Opens a file picker (several files allowed); resolves with null if cancelled.
+  'media:import': { args: []; result: MediaImportResult | null }
+  'media:set-info': { args: [id: number, info: MediaInfo]; result: MediaItem }
+  'media:rename': { args: [id: number, name: string]; result: MediaItem }
+  'media:delete': { args: [id: number]; result: void }
+  'themes:list': { args: []; result: Theme[] }
+  'themes:create': { args: [input: ThemeInput]; result: Theme }
+  'themes:update': { args: [id: number, input: ThemeInput]; result: Theme }
+  'themes:delete': { args: [id: number]; result: void }
 }
 
 // Push events: main -> renderer.
@@ -85,6 +117,9 @@ export interface EventContract {
   // A song was created, changed, or deleted (its id), so lists can refresh.
   'songs:changed': number
   'bible:versions-changed': BibleVersionInfo[]
+  'media:changed': MediaItem[]
+  // Also sent when media changes, because theme backgrounds point at media.
+  'themes:changed': Theme[]
 }
 
 export type InvokeChannel = keyof InvokeContract
