@@ -97,12 +97,14 @@ Cabut-colok HDMI sudah diuji dengan test otomatis (`src/main/output/manager.test
 
 ### Tahap 3 · Lagu (B)
 
-- [ ] Tambah/ubah/hapus lagu dan metadatanya.
-- [ ] Editor lirik dengan penanda `[Verse 1]`, `[Chorus]`, dst.
-- [ ] Pencarian cepat judul + lirik (SQLite FTS5), target < 200 ms untuk 5.000 lagu.
-- [ ] Pemecah slide otomatis (batas baris) + unit test.
+- [x] Tambah/ubah/hapus lagu dan metadatanya.
+- [x] Editor lirik dengan penanda `[Verse 1]`, `[Chorus]`, dst., termasuk istilah Indonesia: `[Bait 1]`, `[Reff]`, `[Pre Reff]`, `[Penutup]`.
+- [x] Pencarian cepat judul + lirik + kata kunci (SQLite FTS5); test 5.000 lagu di bawah 200 ms.
+- [x] Pemecah slide otomatis (batas baris, bisa diatur 1–12 di Pengaturan) + unit test.
 
 **Selesai bila:** lagu bisa diketik, dicari, dan tampil per slide di Preview.
+
+Catatan: pindah slide di Live dengan satu tombol (tanpa Enter tiap slide) dikerjakan di Tahap 6 bersama alur Schedule dan Live.
 
 ### Tahap 4 · Alkitab (S)
 
@@ -140,6 +142,7 @@ Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua l
 - Di layar lebar (sekitar 2000 px), Preview dan Live terlalu besar sehingga banyak ruang kosong di bawahnya.
 - Panel Schedule lebar tetapi isinya sedikit.
 - Ukuran huruf terasa kecil dibanding luas layar.
+- Di layar 1366×768, daftar slide di Preview harus di-scroll karena slide besar memakan tempat. Pertimbangkan Preview yang lebih kecil atau thumbnail di samping.
 
 **Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
 
