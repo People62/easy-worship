@@ -55,10 +55,10 @@ easy-worship/
 
 ### Tahap 0 · Persiapan proyek (K)
 
-- [ ] Buat proyek dengan **electron-vite** (React + TypeScript).
-- [ ] Pasang ESLint, Prettier, dan Vitest.
-- [ ] Pasang `better-sqlite3`, pastikan bisa di-build untuk Electron.
-- [ ] Coba buat installer Windows (`electron-builder`) sejak awal.
+- [x] Buat proyek dengan **electron-vite** (React + TypeScript).
+- [x] Pasang ESLint, Prettier, dan Vitest.
+- [x] Pasang `better-sqlite3`, pastikan bisa di-build untuk Electron.
+- [x] Coba buat installer Windows (`electron-builder`) sejak awal.
 
 **Selesai bila:** installer kosong bisa dipasang dan dibuka di Windows 10.
 
