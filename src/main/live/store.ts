@@ -1,9 +1,14 @@
 import {
   clearOverlay,
   INITIAL_LIVE_STATE,
+  goToSlide,
+  MAX_DECK_SLIDES,
   setLogo,
+  showDeck,
   showSlide,
+  stepSlide,
   toggleOverlay,
+  type LiveDeck,
   type LiveState,
   type Overlay,
   type Slide
@@ -26,6 +31,19 @@ export class LiveStore {
     return this.set(showSlide(this.state, slide))
   }
 
+  showDeck(deck: LiveDeck, index: number): LiveState {
+    if (!Array.isArray(deck?.slides) || deck.slides.length > MAX_DECK_SLIDES) throw new Error('Item terlalu besar.')
+    return this.set(showDeck(this.state, { title: String(deck.title ?? ''), slides: deck.slides }, index))
+  }
+
+  goTo(index: number): LiveState {
+    return this.change(goToSlide(this.state, index))
+  }
+
+  step(delta: number): LiveState {
+    return this.change(stepSlide(this.state, delta > 0 ? 1 : -1))
+  }
+
   toggleOverlay(overlay: Exclude<Overlay, 'none'>): LiveState {
     return this.set(toggleOverlay(this.state, overlay))
   }
@@ -41,6 +59,11 @@ export class LiveStore {
   onChange(listener: Listener): () => void {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
+  }
+
+  // Skips the broadcast when nothing changed, e.g. "next" on the last slide.
+  private change(next: LiveState): LiveState {
+    return next === this.state ? next : this.set(next)
   }
 
   private set(next: LiveState): LiveState {

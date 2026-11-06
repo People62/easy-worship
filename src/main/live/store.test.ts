@@ -28,4 +28,31 @@ describe('LiveStore', () => {
     store.clearOverlay()
     expect(listener).not.toHaveBeenCalled()
   })
+
+  it('moves through a deck and skips the broadcast at the last slide', () => {
+    const store = new LiveStore()
+    store.showDeck(
+      {
+        title: 'Lagu',
+        slides: [
+          { id: 'a', text: '1' },
+          { id: 'b', text: '2' }
+        ]
+      },
+      0
+    )
+    const listener = vi.fn()
+    store.onChange(listener)
+    store.step(5)
+    expect(store.get().slide?.id).toBe('b')
+    store.step(1)
+    expect(listener).toHaveBeenCalledTimes(1)
+    store.goTo(0)
+    expect(store.get().index).toBe(0)
+  })
+
+  it('rejects a deck that is not a list of slides', () => {
+    const store = new LiveStore()
+    expect(() => store.showDeck({ title: 'x', slides: 'no' } as never, 0)).toThrow()
+  })
 })

@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { clearOverlay, fitScale, INITIAL_LIVE_STATE, showSlide, slideLines, toggleOverlay, type Slide } from './live'
+import {
+  clearOverlay,
+  findJump,
+  fitScale,
+  goToSlide,
+  INITIAL_LIVE_STATE,
+  showDeck,
+  showSlide,
+  slideLines,
+  stepSlide,
+  toggleOverlay,
+  type LiveDeck,
+  type Slide
+} from './live'
 
 const slide: Slide = { id: 's1', text: 'Bapa Engkau sungguh baik' }
 
@@ -32,6 +45,74 @@ describe('live state', () => {
     showSlide(INITIAL_LIVE_STATE, slide)
     toggleOverlay(INITIAL_LIVE_STATE, 'black')
     expect(INITIAL_LIVE_STATE).toEqual(before)
+  })
+})
+
+const deck: LiveDeck = {
+  title: 'Bapa Engkau Sungguh Baik',
+  slides: [
+    { id: 'a', text: 'satu', jump: '1' },
+    { id: 'b', text: 'dua' },
+    { id: 'c', text: 'reff', jump: 'c' },
+    { id: 'd', text: 'tiga', jump: '2' },
+    { id: 'e', text: 'reff lagi', jump: 'c' }
+  ]
+}
+
+describe('live deck', () => {
+  it('shows a deck at the chosen slide and lifts any overlay', () => {
+    const state = showDeck(toggleOverlay(INITIAL_LIVE_STATE, 'logo'), deck, 2)
+    expect(state).toMatchObject({ index: 2, slide: { id: 'c' }, overlay: 'none', deck })
+  })
+
+  it('clamps the starting slide into the deck', () => {
+    expect(showDeck(INITIAL_LIVE_STATE, deck, 99).index).toBe(4)
+    expect(showDeck(INITIAL_LIVE_STATE, deck, -3).index).toBe(0)
+  })
+
+  it('treats an empty deck as clearing Live', () => {
+    const state = showDeck(showDeck(INITIAL_LIVE_STATE, deck, 1), { title: 'x', slides: [] }, 0)
+    expect(state).toMatchObject({ slide: null, deck: null })
+  })
+
+  it('steps forward and back and stops at both ends', () => {
+    const first = showDeck(INITIAL_LIVE_STATE, deck, 0)
+    expect(stepSlide(first, -1)).toBe(first)
+    const second = stepSlide(first, 1)
+    expect(second.slide?.id).toBe('b')
+    const last = showDeck(INITIAL_LIVE_STATE, deck, 4)
+    expect(stepSlide(last, 1)).toBe(last)
+  })
+
+  it('moving to a slide lifts Black, but staying put changes nothing', () => {
+    const state = showDeck(INITIAL_LIVE_STATE, deck, 1)
+    expect(goToSlide(state, 1)).toBe(state)
+    const black = toggleOverlay(state, 'black')
+    expect(goToSlide(black, 1).overlay).toBe('none')
+  })
+
+  it('does nothing without a deck', () => {
+    expect(stepSlide(INITIAL_LIVE_STATE, 1)).toBe(INITIAL_LIVE_STATE)
+    expect(goToSlide(INITIAL_LIVE_STATE, 2)).toBe(INITIAL_LIVE_STATE)
+  })
+
+  it('wraps a single slide in a deck so it can be shown the same way', () => {
+    expect(showSlide(INITIAL_LIVE_STATE, slide).deck?.slides).toEqual([slide])
+    expect(showSlide(INITIAL_LIVE_STATE, null).deck).toBeNull()
+  })
+})
+
+describe('findJump', () => {
+  it('finds the next part with the key, wrapping around', () => {
+    expect(findJump(deck.slides, 'c', 0)).toBe(2)
+    expect(findJump(deck.slides, 'C', 2)).toBe(4)
+    expect(findJump(deck.slides, 'c', 4)).toBe(2)
+    expect(findJump(deck.slides, '2', 0)).toBe(3)
+  })
+
+  it('returns -1 when the item has no such part', () => {
+    expect(findJump(deck.slides, 'b', 0)).toBe(-1)
+    expect(findJump([], 'c', 0)).toBe(-1)
   })
 })
 
