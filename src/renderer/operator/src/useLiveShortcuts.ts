@@ -5,7 +5,17 @@ interface Shortcuts {
   onToggleOverlay: (overlay: Exclude<Overlay, 'none'>) => void
   onClearOverlay: () => void
   onSendPreview: () => void
+  onMovePreview: (delta: number) => void
   onOpenSettings: () => void
+}
+
+const MOVE_KEYS: Record<string, number> = {
+  ArrowLeft: -1,
+  ArrowUp: -1,
+  PageUp: -1,
+  ArrowRight: 1,
+  ArrowDown: 1,
+  PageDown: 1
 }
 
 const OVERLAY_KEYS: Record<string, Exclude<Overlay, 'none'>> = { F5: 'black', F6: 'clear', F7: 'logo' }
@@ -17,7 +27,8 @@ function isTyping(target: EventTarget | null): boolean {
 
 // Keyboard shortcuts from the PRD. F5–F7 and Esc work everywhere, even while
 // typing, because they must always be reachable during a service. Enter only
-// sends the preview when the operator is not typing.
+// sends the preview and the arrow keys move between slides when the
+// operator is not typing.
 export function useLiveShortcuts(shortcuts: Shortcuts, enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return
@@ -31,8 +42,13 @@ export function useLiveShortcuts(shortcuts: Shortcuts, enabled: boolean): void {
       } else if (event.ctrlKey && event.key === ',') {
         event.preventDefault()
         shortcuts.onOpenSettings()
+      } else if (event.key in MOVE_KEYS && !isTyping(event.target) && !event.altKey) {
+        event.preventDefault()
+        shortcuts.onMovePreview(MOVE_KEYS[event.key])
       } else if (event.key === 'Enter' && (event.ctrlKey || !isTyping(event.target))) {
-        if (event.target instanceof HTMLButtonElement) return
+        // On ordinary buttons Enter keeps its normal meaning (click). Slide
+        // thumbnails opt in, so "click a slide, press Enter" sends it.
+        if (event.target instanceof HTMLButtonElement && !event.target.dataset.enterSends) return
         event.preventDefault()
         shortcuts.onSendPreview()
       }

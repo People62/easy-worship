@@ -460,30 +460,19 @@ select {
 
 .slide-frame {
   overflow: hidden;
+  /* Never let a long slide list squeeze the big preview. */
+  flex-shrink: 0;
+}
+
+.preview-head,
+.panel .row {
+  flex-shrink: 0;
 }
 
 .row {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.test-slide {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.test-slide textarea {
-  resize: vertical;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  font: inherit;
-  font-size: 14px;
 }
 
 .checkbox {
@@ -539,4 +528,249 @@ select {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Phase 3: songs */
+.muted {
+  color: var(--muted);
+}
+
+.library {
+  gap: 10px;
+}
+
+.song-library {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  flex: 1;
+}
+
+.library-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.library-toolbar .search {
+  max-width: none;
+  margin-left: 0;
+}
+
+.song-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px;
+}
+
+.song-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.song-row:hover {
+  border-color: var(--primary);
+}
+
+.song-row.selected {
+  border: 2px solid var(--primary);
+  padding: 7px 9px;
+}
+
+.song-title {
+  font-weight: 600;
+}
+
+.song-first-line,
+.song-author {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-head .btn {
+  margin-left: auto;
+}
+
+.slide-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.slide-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.slide-thumb.selected {
+  border-color: var(--primary);
+}
+
+.thumb-frame {
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.thumb-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.slide-thumb.is-live .thumb-label {
+  color: var(--primary-text);
+}
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  padding: 10px 14px;
+  border: 1px solid #dc2626;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.dialog-wide {
+  width: min(1100px, calc(100vw - 48px));
+}
+
+.song-editor {
+  gap: 14px;
+}
+
+.song-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field input,
+.field textarea {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+}
+
+.field-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.field-inline input {
+  width: 80px;
+}
+
+.lyrics-area {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 14px;
+}
+
+.lyrics-field textarea {
+  min-height: 360px;
+  resize: vertical;
+  font-family: Consolas, 'Cascadia Mono', monospace;
+  line-height: 1.5;
+}
+
+.lyrics-help {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lyrics-help h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--fg);
+}
+
+.lyrics-help p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.lyrics-help code {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+.section-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-chips li {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--fg);
 }
