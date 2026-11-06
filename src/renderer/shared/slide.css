@@ -36,3 +36,13 @@
   max-height: 60%;
   object-fit: contain;
 }
+
+.slide-caption {
+  position: absolute;
+  left: 120px;
+  right: 120px;
+  bottom: 48px;
+  font-size: 44px;
+  font-weight: 600;
+  opacity: 0.85;
+}

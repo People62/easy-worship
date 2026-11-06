@@ -8,6 +8,12 @@ export interface Slide {
   text: string
   // Short label for the operator, e.g. "Verse 1". Never shown on the TV.
   label?: string
+  // Small line under the text on the TV, e.g. "Yohanes 3:16 (TB)".
+  caption?: string
+  // Per-slide overrides of the style: Bible text is not shown in capitals
+  // and uses a slightly smaller font than song lyrics.
+  uppercase?: boolean
+  fontScale?: number
   background?: Background
 }
 
