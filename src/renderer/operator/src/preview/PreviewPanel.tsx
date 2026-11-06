@@ -1,5 +1,7 @@
 import type { LiveState, Slide } from '@shared/live'
+import type { NewScheduleItem } from '@shared/schedule'
 import { SlideRenderer } from '../../../shared/SlideRenderer'
+import { dragNewItem } from '../schedule/drag'
 
 interface PreviewPanelProps {
   // Song title or Bible passage, or null when nothing is open.
@@ -8,12 +10,15 @@ interface PreviewPanelProps {
   selectedIndex: number
   liveSlideId: string | null
   live: LiveState
+  // What "+ Schedule" adds, or null when the item is already from the schedule.
+  scheduleItem: NewScheduleItem | null
   onSelect: (index: number) => void
   onSend: (index: number) => void
+  onAddToSchedule: () => void
 }
 
 export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
-  const { title, slides, selectedIndex, liveSlideId, live, onSelect, onSend } = props
+  const { title, slides, selectedIndex, liveSlideId, live, scheduleItem, onSelect, onSend, onAddToSchedule } = props
   const selected = slides[selectedIndex] ?? null
 
   return (
@@ -25,10 +30,22 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
       {title ? (
         <>
           <div className="preview-head">
-            <strong>{title}</strong>
+            <strong
+              draggable={scheduleItem !== null}
+              onDragStart={(e) => scheduleItem && dragNewItem(e, scheduleItem)}
+              className={scheduleItem ? 'draggable' : undefined}
+              title={scheduleItem ? 'Seret ke Schedule' : undefined}
+            >
+              {title}
+            </strong>
             <span className="muted">
               {selected?.label} · {selectedIndex + 1}/{slides.length}
             </span>
+            {scheduleItem && (
+              <button type="button" className="btn" onClick={onAddToSchedule} title="Tambahkan ke Schedule (Ctrl+T)">
+                + Schedule
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-primary"
@@ -68,7 +85,7 @@ export function PreviewPanel(props: PreviewPanelProps): React.JSX.Element {
         </>
       ) : (
         <p className="empty">
-          Pilih lagu atau ketik ayat di Pustaka untuk melihat slidenya. Panah kiri/kanan memilih slide.
+          Pilih item di Schedule, atau lagu dan ayat di Pustaka, untuk melihat slidenya. Shift+panah memilih slide.
         </p>
       )}
     </>

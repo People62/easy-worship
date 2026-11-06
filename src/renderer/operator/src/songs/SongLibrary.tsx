@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { SongSummary } from '@shared/songs'
+import { dragNewItem } from '../schedule/drag'
 import { useSongSearch } from './useSongSearch'
 
 interface SongLibraryProps {
@@ -58,9 +59,11 @@ export function SongLibrary({ selectedId, onSelect, onCreate, onEdit, onDelete }
               <button
                 type="button"
                 className={song.id === selectedId ? 'song-row selected' : 'song-row'}
+                draggable
+                onDragStart={(e) => dragNewItem(e, { kind: 'song', songId: song.id, title: song.title })}
                 onClick={() => onSelect(song)}
                 onDoubleClick={() => onEdit(song.id)}
-                title="Klik untuk Preview, klik dua kali untuk mengubah"
+                title="Klik untuk Preview, seret ke Schedule, klik dua kali untuk mengubah"
               >
                 <span className="song-title">{song.title}</span>
                 <span className="song-first-line">{song.firstLine}</span>
