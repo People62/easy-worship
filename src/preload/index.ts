@@ -52,6 +52,15 @@ const api = {
     update: (...args: InvokeContract['songs:update']['args']) => invoke('songs:update', ...args),
     delete: (...args: InvokeContract['songs:delete']['args']) => invoke('songs:delete', ...args),
     onChanged: (listener: (id: EventContract['songs:changed']) => void) => on('songs:changed', listener)
+  },
+  bible: {
+    listVersions: () => invoke('bible:list-versions'),
+    importFile: () => invoke('bible:import'),
+    renameVersion: (...args: InvokeContract['bible:rename-version']['args']) => invoke('bible:rename-version', ...args),
+    deleteVersion: (...args: InvokeContract['bible:delete-version']['args']) => invoke('bible:delete-version', ...args),
+    getPassage: (...args: InvokeContract['bible:get-passage']['args']) => invoke('bible:get-passage', ...args),
+    onVersionsChanged: (listener: (versions: EventContract['bible:versions-changed']) => void) =>
+      on('bible:versions-changed', listener)
   }
 }
 

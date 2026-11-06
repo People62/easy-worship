@@ -2,9 +2,12 @@ import { join } from 'node:path'
 import { app, BrowserWindow, dialog, Menu, nativeTheme, shell } from 'electron'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import type { DatabaseStatus } from '@shared/ipc'
+import { formatReference, parseReference } from '@shared/bible/reference'
 import { validateSongInput } from '@shared/songs'
 import type { AppSettings } from '@shared/settings'
 import { formatVersionLabel } from '@shared/version'
+import { readBibleFile } from './bible/importers'
+import { BibleRepository } from './bible/repository'
 import { importLogo, LOGO_EXTENSIONS, logoUrl, removeLogos } from './church/logo'
 import { closeDatabase, getDatabase, openDatabase } from './db'
 import { listDisplays, watchDisplays } from './displays'
@@ -86,6 +89,17 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     if (!Number.isInteger(id) || (id as number) < 1) throw new Error('Nomor lagu tidak valid.')
     return id as number
   }
+  const bibleRepository = db ? new BibleRepository(db) : null
+  const bible = (): BibleRepository => {
+    if (!bibleRepository)
+      throw new Error('Database tidak bisa dibuka, jadi Alkitab tidak tersedia. Lihat Pengaturan → Tentang.')
+    return bibleRepository
+  }
+  const versionId = (id: unknown): number => {
+    if (!Number.isInteger(id) || (id as number) < 1) throw new Error('Terjemahan tidak valid.')
+    return id as number
+  }
+  const versionsChanged = (): void => broadcast('bible:versions-changed', bible().listVersions())
 
   registerHandlers({
     'app:get-info': () => ({
@@ -136,6 +150,53 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'songs:delete': (id) => {
       songs().delete(songId(id))
       broadcast('songs:changed', id)
+    },
+    'bible:list-versions': () => bible().listVersions(),
+    'bible:import': async () => {
+      const options = {
+        title: 'Impor Alkitab',
+        properties: ['openFile' as const],
+        filters: [{ name: 'Alkitab (Zefania, OSIS, OpenSong)', extensions: ['xml', 'osis', 'zefania'] }]
+      }
+      const result = operatorWindow
+        ? await dialog.showOpenDialog(operatorWindow, options)
+        : await dialog.showOpenDialog(options)
+      const file = result.filePaths[0]
+      if (result.canceled || !file) return null
+      const imported = await readBibleFile(file)
+      const version = bible().importVersion(imported)
+      if (settings.get().bible.versionId === null) settings.update({ bible: { versionId: version.id } })
+      versionsChanged()
+      return { version, skippedBooks: imported.skippedBooks }
+    },
+    'bible:rename-version': (id, name, abbreviation) => {
+      if (typeof name !== 'string' || typeof abbreviation !== 'string') throw new Error('Nama tidak valid.')
+      const version = bible().renameVersion(versionId(id), name, abbreviation)
+      versionsChanged()
+      return version
+    },
+    'bible:delete-version': (id) => {
+      bible().deleteVersion(versionId(id))
+      if (settings.get().bible.versionId === id) {
+        settings.update({ bible: { versionId: bible().listVersions()[0]?.id ?? null } })
+      }
+      versionsChanged()
+    },
+    'bible:get-passage': (id, query) => {
+      const version = bible().getVersion(versionId(id))
+      if (!version) throw new Error('Terjemahan tidak ditemukan. Mungkin sudah dihapus.')
+      const parsed = parseReference(typeof query === 'string' ? query.slice(0, 100) : '')
+      if (!parsed.ok) throw new Error(parsed.error)
+      const verses = bible().getPassage(version.id, parsed.reference)
+      if (verses.length === 0) {
+        throw new Error(`${formatReference(parsed.reference)} tidak ada di ${version.abbreviation}.`)
+      }
+      return {
+        versionId: version.id,
+        abbreviation: version.abbreviation,
+        title: `${formatReference(parsed.reference)} (${version.abbreviation})`,
+        verses
+      }
     }
   })
 }
