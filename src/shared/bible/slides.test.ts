@@ -45,6 +45,7 @@ describe('buildBibleSlides', () => {
       'KJV'
     )
     expect(slides.map((s) => s.label)).toEqual(['Yoh 3:16', 'Yoh 3:17'])
-    expect(slides[0]).toMatchObject({ caption: 'Yohanes 3:16 (KJV)', uppercase: false, id: 'bible:KJV:43:3:16:0' })
+    expect(slides[0]).toMatchObject({ caption: 'Yohanes 3:16 (KJV)', id: 'bible:KJV:43:3:16:0' })
+    expect(slides[0].style).toBeUndefined()
   })
 })

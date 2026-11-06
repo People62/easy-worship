@@ -1,4 +1,4 @@
-import type { Slide } from './live'
+import type { Slide, SlideStyle } from './live'
 import { sectionLabel, type Song, type SongSection } from './songs'
 
 export const MIN_LINES_PER_SLIDE = 1
@@ -34,14 +34,15 @@ export function sectionSlideTexts(section: Pick<SongSection, 'text'>, maxLines: 
     .map((lines) => lines.join('\n'))
 }
 
-export function buildSongSlides(song: Pick<Song, 'id' | 'sections'>, maxLines: number): Slide[] {
+export function buildSongSlides(song: Pick<Song, 'id' | 'sections'>, maxLines: number, style?: SlideStyle): Slide[] {
   return song.sections.flatMap((section, sectionIndex) => {
     const texts = sectionSlideTexts(section, maxLines)
     const label = sectionLabel(section)
     return texts.map((text, part) => ({
       id: `song:${song.id}:${sectionIndex}:${part}`,
       text,
-      label: texts.length > 1 ? `${label} (${part + 1}/${texts.length})` : label
+      label: texts.length > 1 ? `${label} (${part + 1}/${texts.length})` : label,
+      ...(style ? { style } : {})
     }))
   })
 }
