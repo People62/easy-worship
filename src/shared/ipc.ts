@@ -1,3 +1,4 @@
+import type { BibleVerse } from './bible/slides'
 import type { LiveState, Overlay, Slide } from './live'
 import type { OutputStatus } from './output'
 import type { AppSettings, SettingsPatch } from './settings'
@@ -16,6 +17,28 @@ export interface AppInfo {
 }
 
 export type DatabaseStatus = { ok: true; sqliteVersion: string; schemaVersion: number } | { ok: false; error: string }
+
+export interface BibleVersionInfo {
+  id: number
+  name: string
+  abbreviation: string
+  language: string
+  license: string
+  verseCount: number
+}
+
+export interface BiblePassage {
+  versionId: number
+  abbreviation: string
+  // "Yohanes 3:16-18 (TB)"
+  title: string
+  verses: BibleVerse[]
+}
+
+export interface BibleImportResult {
+  version: BibleVersionInfo
+  skippedBooks: number
+}
 
 export interface DisplayInfo {
   id: number
@@ -44,6 +67,13 @@ export interface InvokeContract {
   'songs:create': { args: [input: SongInput]; result: Song }
   'songs:update': { args: [id: number, input: SongInput]; result: Song }
   'songs:delete': { args: [id: number]; result: void }
+  'bible:list-versions': { args: []; result: BibleVersionInfo[] }
+  // Opens a file picker; resolves with null if cancelled.
+  'bible:import': { args: []; result: BibleImportResult | null }
+  'bible:rename-version': { args: [id: number, name: string, abbreviation: string]; result: BibleVersionInfo }
+  'bible:delete-version': { args: [id: number]; result: void }
+  // Parses the typed reference in main, so the same rules apply everywhere.
+  'bible:get-passage': { args: [versionId: number, query: string]; result: BiblePassage }
 }
 
 // Push events: main -> renderer.
@@ -54,6 +84,7 @@ export interface EventContract {
   'output:status-changed': OutputStatus
   // A song was created, changed, or deleted (its id), so lists can refresh.
   'songs:changed': number
+  'bible:versions-changed': BibleVersionInfo[]
 }
 
 export type InvokeChannel = keyof InvokeContract

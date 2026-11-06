@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sample of the King James Version (public domain) for tests. -->
+<XMLBIBLE biblename="King James Version" type="x-bible">
+  <INFORMATION>
+    <title>King James Version</title>
+    <identifier>KJV</identifier>
+    <language>ENG</language>
+    <rights>Public Domain</rights>
+  </INFORMATION>
+  <BIBLEBOOK bnumber="1" bname="Genesis">
+    <CHAPTER cnumber="1">
+      <VERS vnumber="1">In the beginning God created the heaven and the earth.</VERS>
+      <VERS vnumber="2">And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.</VERS>
+      <VERS vnumber="3">And God said, Let there be light: and there was light.<NOTE>Footnote that must not appear.</NOTE></VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+  <BIBLEBOOK bnumber="19" bname="Psalms">
+    <CHAPTER cnumber="23">
+      <VERS vnumber="1">The <STYLE css="font-weight:bold">LORD</STYLE> is my shepherd; I shall not want.</VERS>
+      <VERS vnumber="2">He maketh me to lie down in green pastures: he leadeth me beside the still waters.</VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+  <BIBLEBOOK bnumber="43" bname="John">
+    <CHAPTER cnumber="3">
+      <VERS vnumber="16">For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.</VERS>
+      <VERS vnumber="17">For God sent not his Son into the world to condemn the world; but that the world through him might be saved.</VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+  <BIBLEBOOK bnumber="67" bname="Tobit">
+    <CHAPTER cnumber="1">
+      <VERS vnumber="1">A book outside the 66-book canon, skipped on import.</VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+</XMLBIBLE>

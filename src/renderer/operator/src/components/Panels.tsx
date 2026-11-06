@@ -24,7 +24,7 @@ export function EmptyState({ children }: { children: React.ReactNode }): React.J
 
 const LIBRARY_TABS = [
   { id: 'songs', label: 'Lagu', empty: '' },
-  { id: 'bible', label: 'Alkitab', empty: 'Belum ada Alkitab. Tersedia di Tahap 4.' },
+  { id: 'bible', label: 'Alkitab', empty: '' },
   { id: 'media', label: 'Media', empty: 'Belum ada media. Tersedia di Tahap 5.' },
   { id: 'themes', label: 'Tema', empty: 'Belum ada tema. Tersedia di Tahap 5.' }
 ] as const
@@ -33,7 +33,7 @@ type LibraryTabId = (typeof LIBRARY_TABS)[number]['id']
 
 // The bottom panel. Each tab shows its own content; tabs that are not built
 // yet show which phase brings them.
-export function Library({ songs }: { songs: React.ReactNode }): React.JSX.Element {
+export function Library({ songs, bible }: { songs: React.ReactNode; bible: React.ReactNode }): React.JSX.Element {
   const [active, setActive] = useState<LibraryTabId>('songs')
   const tab = LIBRARY_TABS.find((t) => t.id === active) ?? LIBRARY_TABS[0]
 
@@ -53,7 +53,7 @@ export function Library({ songs }: { songs: React.ReactNode }): React.JSX.Elemen
           </button>
         ))}
       </div>
-      {tab.id === 'songs' ? songs : <EmptyState>{tab.empty}</EmptyState>}
+      {tab.id === 'songs' ? songs : tab.id === 'bible' ? bible : <EmptyState>{tab.empty}</EmptyState>}
     </section>
   )
 }

@@ -23,6 +23,10 @@ export interface AppSettings {
     // Lines of lyrics per slide before a part is split over more slides.
     linesPerSlide: number
   }
+  bible: {
+    // The translation used for lookups, or null for the first one.
+    versionId: number | null
+  }
 }
 
 export type SettingsPatch = {
@@ -30,6 +34,7 @@ export type SettingsPatch = {
   output?: Partial<AppSettings['output']>
   church?: Partial<AppSettings['church']>
   songs?: Partial<AppSettings['songs']>
+  bible?: Partial<AppSettings['bible']>
 }
 
 export const DEFAULT_PRIMARY = '#D4A017'
@@ -38,7 +43,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   appearance: { mode: 'dark', primary: DEFAULT_PRIMARY },
   output: { displayId: null, windowed: false },
   church: { logoFile: null },
-  songs: { linesPerSlide: DEFAULT_LINES_PER_SLIDE }
+  songs: { linesPerSlide: DEFAULT_LINES_PER_SLIDE },
+  bible: { versionId: null }
 }
 
 export const PRIMARY_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
@@ -89,6 +95,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const output = asRecord(root.output)
   const church = asRecord(root.church)
   const songs = asRecord(root.songs)
+  const bible = asRecord(root.bible)
 
   return {
     appearance: {
@@ -104,6 +111,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
     },
     songs: {
       linesPerSlide: isLinesPerSlide(songs.linesPerSlide) ? songs.linesPerSlide : DEFAULT_SETTINGS.songs.linesPerSlide
+    },
+    bible: {
+      versionId: isDisplayId(bible.versionId) ? bible.versionId : DEFAULT_SETTINGS.bible.versionId
     }
   }
 }
@@ -115,7 +125,8 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
     appearance: { ...current.appearance },
     output: { ...current.output },
     church: { ...current.church },
-    songs: { ...current.songs }
+    songs: { ...current.songs },
+    bible: { ...current.bible }
   }
 
   if (patch.appearance?.mode !== undefined) {
@@ -143,6 +154,10 @@ export function applySettingsPatch(current: AppSettings, patch: SettingsPatch): 
       throw new Error(`Baris per slide harus ${MIN_LINES_PER_SLIDE}–${MAX_LINES_PER_SLIDE}.`)
     }
     next.songs.linesPerSlide = patch.songs.linesPerSlide
+  }
+  if (patch.bible?.versionId !== undefined) {
+    if (!isDisplayId(patch.bible.versionId)) throw new Error(`Invalid bible version: ${String(patch.bible.versionId)}`)
+    next.bible.versionId = patch.bible.versionId
   }
 
   return next

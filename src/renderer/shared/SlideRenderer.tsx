@@ -27,7 +27,8 @@ function useFitScale<T extends HTMLElement>(): [React.RefObject<T | null>, numbe
 export function SlideRenderer({ slide, style, overlay, logoUrl }: SlideRendererProps): React.JSX.Element {
   const [boxRef, scale] = useFitScale<HTMLDivElement>()
   const background = slide?.background ?? style.background
-  const lines = slide ? slideLines(slide.text, style.uppercase) : []
+  const lines = slide ? slideLines(slide.text, slide.uppercase ?? style.uppercase) : []
+  const fontSize = style.fontSize * (slide?.fontScale ?? 1)
 
   return (
     <div ref={boxRef} className="slide-box">
@@ -48,7 +49,9 @@ export function SlideRenderer({ slide, style, overlay, logoUrl }: SlideRendererP
             className="slide-text"
             style={{
               fontFamily: style.fontFamily,
-              fontSize: style.fontSize,
+              fontSize,
+              // Leave room for the caption line at the bottom.
+              bottom: slide?.caption ? 170 : undefined,
               lineHeight: style.lineHeight,
               color: style.color,
               textAlign: style.align,
@@ -60,6 +63,19 @@ export function SlideRenderer({ slide, style, overlay, logoUrl }: SlideRendererP
                 {line || ' '}
               </div>
             ))}
+          </div>
+        )}
+        {overlay === 'none' && slide?.caption && (
+          <div
+            className="slide-caption"
+            style={{
+              fontFamily: style.fontFamily,
+              color: style.color,
+              textAlign: style.align,
+              textShadow: style.shadow ? '0 3px 8px rgb(0 0 0 / 85%)' : 'none'
+            }}
+          >
+            {slide.caption}
           </div>
         )}
       </div>

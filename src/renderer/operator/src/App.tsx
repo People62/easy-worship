@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { buildBibleSlides } from '@shared/bible/slides'
+import type { BiblePassage } from '@shared/ipc'
 import { buildSongSlides } from '@shared/slides'
 import type { Song, SongSummary } from '@shared/songs'
 import { SlideRenderer } from '../../shared/SlideRenderer'
@@ -6,6 +8,7 @@ import { useLive } from '../../shared/useLive'
 import { EmptyState, Library, Panel } from './components/Panels'
 import { SettingsDialog } from './components/SettingsDialog'
 import { TopBar } from './components/TopBar'
+import { BibleLibrary } from './bible/BibleLibrary'
 import { errorMessage } from './errors'
 import { PreviewPanel } from './preview/PreviewPanel'
 import { SongEditorDialog } from './songs/SongEditorDialog'
@@ -18,6 +21,9 @@ import { useSettings } from './useSettings'
 // The song editor is either closed, open for a new song, or open for one song.
 type EditorState = { open: false } | { open: true; song: Song | null }
 
+// What Preview shows: a song or a Bible passage.
+type PreviewItem = { kind: 'song'; song: Song } | { kind: 'bible'; passage: BiblePassage }
+
 export function App(): React.JSX.Element {
   const { settings, update, error } = useSettings()
   const mode = useAppearance(settings?.appearance)
@@ -27,13 +33,18 @@ export function App(): React.JSX.Element {
   const [editor, setEditor] = useState<EditorState>({ open: false })
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const [previewSong, setPreviewSong] = useState<Song | null>(null)
+  const [preview, setPreview] = useState<PreviewItem | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const previewSong = preview?.kind === 'song' ? preview.song : null
+  const setPreviewSong = useCallback((song: Song | null) => setPreview(song ? { kind: 'song', song } : null), [])
   const linesPerSlide = settings?.songs.linesPerSlide ?? 4
-  const slides = useMemo(
-    () => (previewSong ? buildSongSlides(previewSong, linesPerSlide) : []),
-    [previewSong, linesPerSlide]
-  )
+  const slides = useMemo(() => {
+    if (preview?.kind === 'song') return buildSongSlides(preview.song, linesPerSlide)
+    if (preview?.kind === 'bible') return buildBibleSlides(preview.passage.verses, preview.passage.abbreviation)
+    return []
+  }, [preview, linesPerSlide])
+  const previewTitle =
+    preview?.kind === 'song' ? preview.song.title : preview?.kind === 'bible' ? preview.passage.title : null
   const safeIndex = Math.min(selectedIndex, Math.max(0, slides.length - 1))
 
   const run = useCallback(async (action: () => Promise<unknown>): Promise<void> => {
@@ -52,7 +63,7 @@ export function App(): React.JSX.Element {
         setPreviewSong(song)
         if (!keepIndex) setSelectedIndex(0)
       }),
-    [run]
+    [run, setPreviewSong]
   )
 
   // Keep the preview in sync when its song is edited or deleted elsewhere.
@@ -119,7 +130,7 @@ export function App(): React.JSX.Element {
 
         <Panel title="Preview">
           <PreviewPanel
-            song={previewSong}
+            title={previewTitle}
             slides={slides}
             selectedIndex={safeIndex}
             liveSlideId={live.slide?.id ?? null}
@@ -153,6 +164,16 @@ export function App(): React.JSX.Element {
         </Panel>
 
         <Library
+          bible={
+            <BibleLibrary
+              versionId={settings.bible.versionId}
+              onVersionChange={(versionId) => void update({ bible: { versionId } })}
+              onOpenPassage={(passage) => {
+                setPreview({ kind: 'bible', passage })
+                setSelectedIndex(0)
+              }}
+            />
+          }
           songs={
             <SongLibrary
               selectedId={previewSong?.id ?? null}

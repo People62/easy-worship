@@ -774,3 +774,88 @@ select {
   background: var(--surface-2);
   color: var(--fg);
 }
+
+/* Phase 4: Bible */
+.bible-library,
+.bible-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bible-empty {
+  align-items: flex-start;
+  max-width: 720px;
+}
+
+.bible-empty p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.version-select {
+  width: auto;
+  max-width: 260px;
+}
+
+.reference-hint {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reference-hint > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.warn-text {
+  color: #f97316;
+}
+
+.chip {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--fg);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--primary);
+}
+
+.notice {
+  margin: 0;
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.version-manager ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.version-row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.version-row input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
