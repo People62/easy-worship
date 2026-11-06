@@ -128,11 +128,15 @@ Terjemahan Baru (TB) milik LAI dan berhak cipta. Untuk pemakaian gereja, gunakan
 
 ### Tahap 5 · Media dan tema (S)
 
-- [ ] Pustaka gambar dan video + thumbnail (disimpan, ukuran kecil).
-- [ ] Video latar berulang tanpa suara, maksimal 1080p.
-- [ ] Editor tema: font, ukuran, warna, outline/bayangan, perataan, margin, latar, huruf kapital.
+- [x] Pustaka gambar dan video + thumbnail (disimpan, 320×180 JPEG). File disalin ke folder aplikasi. Video di atas 1080p diberi peringatan.
+- [x] Video latar berulang tanpa suara. Hanya jendela TV yang memutar video; Preview, Live, dan thumbnail memakai gambar diam agar hemat memori.
+- [x] Editor tema: font, ukuran, jarak baris, warna, garis tepi, bayangan, perataan, margin, latar (warna/gambar/video), peredup latar, huruf kapital. Tema default terpisah untuk Lagu, Alkitab, dan Teks.
 
 **Selesai bila:** lirik tampil di atas video latar dengan lancar di laptop RAM 4 GB.
+
+Sudah diuji di Linux dengan video WEBM 640×360. Uji kelancaran di laptop gereja (RAM 4 GB, video 1080p) masih diperlukan.
+
+Belum termasuk (P1): tema khusus per lagu (F-LG-07) dan video sebagai item dengan suara (F-MD-03).
 
 ### Tahap 6 · Schedule dan alur Live (S)
 
@@ -155,6 +159,7 @@ Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua l
 - Panel Schedule lebar tetapi isinya sedikit.
 - Ukuran huruf terasa kecil dibanding luas layar.
 - Di layar 1366×768, daftar slide di Preview harus di-scroll karena slide besar memakan tempat. Pertimbangkan Preview yang lebih kecil atau thumbnail di samping.
+- Tab Tema di Pustaka terasa sempit di layar 1366×768: kartu tema terpotong dan perlu di-scroll.
 
 **Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
 
