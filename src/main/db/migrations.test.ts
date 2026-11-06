@@ -27,6 +27,12 @@ describe('migrate', () => {
       'settings',
       'song_sections',
       'songs',
+      'songs_fts',
+      'songs_fts_config',
+      'songs_fts_content',
+      'songs_fts_data',
+      'songs_fts_docsize',
+      'songs_fts_idx',
       'themes'
     ])
     expect(db.pragma('user_version', { simple: true })).toBe(LATEST_VERSION)

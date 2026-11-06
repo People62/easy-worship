@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { app, BrowserWindow, dialog, Menu, nativeTheme, shell } from 'electron'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import type { DatabaseStatus } from '@shared/ipc'
+import { validateSongInput } from '@shared/songs'
 import type { AppSettings } from '@shared/settings'
 import { formatVersionLabel } from '@shared/version'
 import { importLogo, LOGO_EXTENSIONS, logoUrl, removeLogos } from './church/logo'
@@ -12,6 +13,7 @@ import { LiveStore } from './live/store'
 import { OutputManager } from './output/manager'
 import { handleEgwProtocol, registerEgwScheme } from './protocol'
 import { SettingsStore } from './settings/store'
+import { SongRepository } from './songs/repository'
 
 let databaseStatus: DatabaseStatus = { ok: false, error: 'Database not opened yet' }
 let operatorWindow: BrowserWindow | null = null
@@ -73,6 +75,17 @@ function createOperatorWindow(): BrowserWindow {
 
 function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputManager): void {
   const userData = app.getPath('userData')
+  const db = getDatabase()
+  const songRepository = db ? new SongRepository(db) : null
+  const songs = (): SongRepository => {
+    if (!songRepository)
+      throw new Error('Database tidak bisa dibuka, jadi lagu tidak tersedia. Lihat Pengaturan → Tentang.')
+    return songRepository
+  }
+  const songId = (id: unknown): number => {
+    if (!Number.isInteger(id) || (id as number) < 1) throw new Error('Nomor lagu tidak valid.')
+    return id as number
+  }
 
   registerHandlers({
     'app:get-info': () => ({
@@ -107,6 +120,22 @@ function registerIpc(settings: SettingsStore, live: LiveStore, output: OutputMan
     'church:remove-logo': async () => {
       await removeLogos(userData)
       return settings.update({ church: { logoFile: null } })
+    },
+    'songs:search': (query) => songs().search(typeof query === 'string' ? query.slice(0, 200) : ''),
+    'songs:get': (id) => songs().get(songId(id)),
+    'songs:create': (input) => {
+      const song = songs().create(validateSongInput(input))
+      broadcast('songs:changed', song.id)
+      return song
+    },
+    'songs:update': (id, input) => {
+      const song = songs().update(songId(id), validateSongInput(input))
+      broadcast('songs:changed', song.id)
+      return song
+    },
+    'songs:delete': (id) => {
+      songs().delete(songId(id))
+      broadcast('songs:changed', id)
     }
   })
 }

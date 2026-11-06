@@ -8,6 +8,7 @@ import {
   type SettingsPatch,
   type ThemeMode
 } from '@shared/settings'
+import { MAX_LINES_PER_SLIDE, MIN_LINES_PER_SLIDE } from '@shared/slides'
 import { CheckIcon } from './Icons'
 
 interface SettingsDialogProps {
@@ -205,6 +206,26 @@ export function SettingsDialog({
               </span>
             </span>
           </label>
+        </section>
+
+        <section className="setting-group">
+          <h3>Lagu</h3>
+          <label className="field field-inline">
+            <span>Baris lirik per slide</span>
+            <input
+              type="number"
+              min={MIN_LINES_PER_SLIDE}
+              max={MAX_LINES_PER_SLIDE}
+              value={settings.songs.linesPerSlide}
+              onChange={(event) => {
+                const value = Number(event.target.value)
+                if (Number.isInteger(value) && value >= MIN_LINES_PER_SLIDE && value <= MAX_LINES_PER_SLIDE) {
+                  onUpdate({ songs: { linesPerSlide: value } })
+                }
+              }}
+            />
+          </label>
+          <p className="hint">Bagian lagu yang lebih panjang dibagi rata ke beberapa slide.</p>
         </section>
 
         <section className="setting-group">

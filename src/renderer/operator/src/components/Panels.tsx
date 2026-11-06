@@ -23,43 +23,37 @@ export function EmptyState({ children }: { children: React.ReactNode }): React.J
 }
 
 const LIBRARY_TABS = [
-  { id: 'songs', label: 'Lagu', placeholder: 'Cari judul atau lirik…', empty: 'Belum ada lagu. Tersedia di Tahap 3.' },
-  { id: 'bible', label: 'Alkitab', placeholder: 'Contoh: yoh 3:16', empty: 'Belum ada Alkitab. Tersedia di Tahap 4.' },
-  {
-    id: 'media',
-    label: 'Media',
-    placeholder: 'Cari gambar atau video…',
-    empty: 'Belum ada media. Tersedia di Tahap 5.'
-  },
-  { id: 'themes', label: 'Tema', placeholder: 'Cari tema…', empty: 'Belum ada tema. Tersedia di Tahap 5.' }
+  { id: 'songs', label: 'Lagu', empty: '' },
+  { id: 'bible', label: 'Alkitab', empty: 'Belum ada Alkitab. Tersedia di Tahap 4.' },
+  { id: 'media', label: 'Media', empty: 'Belum ada media. Tersedia di Tahap 5.' },
+  { id: 'themes', label: 'Tema', empty: 'Belum ada tema. Tersedia di Tahap 5.' }
 ] as const
 
 type LibraryTabId = (typeof LIBRARY_TABS)[number]['id']
 
-export function Library(): React.JSX.Element {
+// The bottom panel. Each tab shows its own content; tabs that are not built
+// yet show which phase brings them.
+export function Library({ songs }: { songs: React.ReactNode }): React.JSX.Element {
   const [active, setActive] = useState<LibraryTabId>('songs')
   const tab = LIBRARY_TABS.find((t) => t.id === active) ?? LIBRARY_TABS[0]
 
   return (
     <section className="panel library" aria-label="Pustaka">
-      <div className="library-head">
-        <div className="tabs" role="tablist">
-          {LIBRARY_TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={t.id === active}
-              className={t.id === active ? 'tab active' : 'tab'}
-              onClick={() => setActive(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <input className="search" type="search" placeholder={tab.placeholder} disabled aria-label={tab.placeholder} />
+      <div className="tabs" role="tablist">
+        {LIBRARY_TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={t.id === active}
+            className={t.id === active ? 'tab active' : 'tab'}
+            onClick={() => setActive(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-      <EmptyState>{tab.empty}</EmptyState>
+      {tab.id === 'songs' ? songs : <EmptyState>{tab.empty}</EmptyState>}
     </section>
   )
 }
