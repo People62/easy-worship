@@ -1,6 +1,7 @@
 import type { BibleVerse } from './bible/slides'
-import type { LiveState, Overlay, Slide } from './live'
+import type { LiveDeck, LiveState, Overlay, Slide } from './live'
 import type { OutputStatus } from './output'
+import type { ScheduleItem } from './schedule'
 import type { AppSettings, SettingsPatch } from './settings'
 import type { Song, SongInput, SongSummary } from './songs'
 import type { MediaRef, Theme, ThemeInput } from './theme'
@@ -31,6 +32,8 @@ export interface BibleVersionInfo {
 export interface BiblePassage {
   versionId: number
   abbreviation: string
+  // "Yohanes 3:16-18", readable again by parseReference.
+  reference: string
   // "Yohanes 3:16-18 (TB)"
   title: string
   verses: BibleVerse[]
@@ -62,6 +65,26 @@ export interface MediaImportResult {
   failed: { file: string; error: string }[]
 }
 
+export interface OpenedSchedule {
+  path: string
+  name: string
+  items: ScheduleItem[]
+  // Damaged items left out while opening.
+  skipped: number
+}
+
+export interface SavedSchedule {
+  path: string
+  name: string
+}
+
+export interface RecentSchedule {
+  path: string
+  name: string
+  openedAt: string
+  exists: boolean
+}
+
 export interface DisplayInfo {
   id: number
   label: string
@@ -78,6 +101,9 @@ export interface InvokeContract {
   'displays:list': { args: []; result: DisplayInfo[] }
   'live:get': { args: []; result: LiveState }
   'live:show': { args: [slide: Slide | null]; result: LiveState }
+  'live:show-deck': { args: [deck: LiveDeck, index: number]; result: LiveState }
+  'live:go-to': { args: [index: number]; result: LiveState }
+  'live:step': { args: [delta: number]; result: LiveState }
   'live:toggle-overlay': { args: [overlay: Exclude<Overlay, 'none'>]; result: LiveState }
   'live:clear-overlay': { args: []; result: LiveState }
   'output:get-status': { args: []; result: OutputStatus }
@@ -106,6 +132,10 @@ export interface InvokeContract {
   'themes:create': { args: [input: ThemeInput]; result: Theme }
   'themes:update': { args: [id: number, input: ThemeInput]; result: Theme }
   'themes:delete': { args: [id: number]; result: void }
+  'schedule:open': { args: []; result: OpenedSchedule | null }
+  'schedule:open-recent': { args: [path: string]; result: OpenedSchedule }
+  'schedule:save': { args: [items: ScheduleItem[], path: string | null]; result: SavedSchedule | null }
+  'schedule:list-recent': { args: []; result: RecentSchedule[] }
 }
 
 // Push events: main -> renderer.
@@ -113,6 +143,7 @@ export interface EventContract {
   'settings:changed': AppSettings
   'displays:changed': DisplayInfo[]
   'live:changed': LiveState
+  'schedule:recent-changed': RecentSchedule[]
   'output:status-changed': OutputStatus
   // A song was created, changed, or deleted (its id), so lists can refresh.
   'songs:changed': number
