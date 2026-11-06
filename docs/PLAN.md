@@ -140,14 +140,26 @@ Belum termasuk (P1): tema khusus per lagu (F-LG-07) dan video sebagai item denga
 
 ### Tahap 6 · Schedule dan alur Live (S)
 
-- [ ] Tambah item ke Schedule dengan drag-and-drop; ubah urutan, hapus, duplikat.
-- [ ] Slide teks bebas untuk pengumuman.
-- [ ] Simpan dan buka file `.egw`.
-- [ ] Preview → Live dengan Enter; pindah slide dengan panah, Page Up/Down, spasi, clicker.
-- [ ] Semua pintasan keyboard dari PRD.
-- [ ] Ukuran panel bisa digeser dan diingat (dipindah dari Tahap 1).
+- [x] Tambah item ke Schedule dengan drag-and-drop (dari daftar lagu, media, atau judul di Preview) atau Ctrl+T; ubah urutan (seret, Alt+panah), hapus (Delete), duplikat (Ctrl+D).
+- [x] Slide teks bebas untuk pengumuman: judul dan isi, baris kosong memulai slide baru. Memakai tema Teks.
+- [x] Simpan dan buka file `.egw` (JSON), daftar 10 schedule terakhir. Penyimpanan aman dari mati listrik (tulis ke file sementara lalu tukar). Menutup aplikasi dengan schedule belum disimpan meminta konfirmasi.
+- [x] Preview → Live dengan Enter. Live memegang seluruh slide item, jadi panah kanan, Page Down, spasi, dan clicker pindah slide tanpa Enter. Di slide terakhir, tombol berikutnya tidak melakukan apa pun.
+- [x] Semua pintasan keyboard dari PRD, termasuk lompat bagian lagu 1–9, C, B, E (ditambah P untuk Pre-Chorus dan T untuk Tag). Daftar lengkap: tombol F1 atau `?` di bilah atas.
+- [x] Ukuran panel bisa digeser (mouse atau Tab + panah) dan diingat. Klik dua kali pembatas untuk ukuran awal.
 
 **Selesai bila:** satu urutan ibadah lengkap bisa disusun dan dijalankan hanya dengan keyboard.
+
+Sudah diuji otomatis di Linux: susun schedule (seret, Ctrl+T, teks), jalankan dengan panah, Page Down, spasi, C, 1, 2, F5, simpan, buka lagi dari daftar terakhir, dan tutup dengan perubahan belum disimpan.
+
+Uji di gereja:
+
+- [ ] Clicker presentasi memindahkan slide Live (maju dan mundur).
+- [ ] Susun schedule ibadah Minggu, simpan, tutup aplikasi, buka lagi dari daftar terakhir.
+
+Catatan:
+
+- Item Schedule merujuk lagu, ayat, dan media di pustaka. Bila schedule dibuka di komputer lain, lagu dan media harus ada di pustaka komputer itu. Ekspor paket lengkap (F-SC-04, P2) menyusul.
+- Ayat dicari ulang dari terjemahan yang sama (berdasarkan singkatan bila nomornya berbeda).
 
 ### Tahap 6.5 · Perbaikan desain (S)
 
@@ -160,6 +172,9 @@ Disepakati 2026-11-06: fungsi dulu, desain belakangan. Tahap ini memoles semua l
 - Ukuran huruf terasa kecil dibanding luas layar.
 - Di layar 1366×768, daftar slide di Preview harus di-scroll karena slide besar memakan tempat. Pertimbangkan Preview yang lebih kecil atau thumbnail di samping.
 - Tab Tema di Pustaka terasa sempit di layar 1366×768: kartu tema terpotong dan perlu di-scroll.
+- Di 1366×768, judul panjang di kepala Preview dan Live terbungkus dua baris dan mendorong tombol; daftar slide Live hanya terlihat sebagian.
+- Tombol Schedule (Baru, Buka, ▾, Simpan) masih polos; pertimbangkan ikon dan menu "Buka terakhir" yang lebih jelas.
+- Tanda jenis item di Schedule (L, A, M, T) masih huruf; pertimbangkan ikon dan warna per jenis.
 
 **Selesai bila:** semua layar rapi dan konsisten di layar laptop 1366×768 dan di layar lebar.
 
