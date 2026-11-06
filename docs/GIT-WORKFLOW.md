@@ -70,7 +70,7 @@ docs: add church laptop test results
 
 ## 3. CI: berjalan di setiap push
 
-File: `.github/workflows/ci.yml`. `check` dan `build-windows` berjalan di **setiap push ke branch mana pun**. `commitlint` berjalan di **pull request ke `main`**, karena di situ rentang commit-nya jelas.
+File: `.github/workflows/ci.yml` (`check`, `build-windows`) berjalan di **setiap push ke branch mana pun**. File `.github/workflows/commitlint.yml` berjalan di **pull request ke `main`**, karena di situ rentang commit-nya jelas.
 
 | Job | Runner | Langkah | Gagal bila |
 | --- | --- | --- | --- |

@@ -1,15 +1,12 @@
 name: CI
 
-# "check" and "build-windows" run on every push to any branch.
-# "commitlint" runs on pull requests to main, where the commit range is known.
+# Runs on every push to any branch. Commit messages are checked in commitlint.yml.
 on:
   push:
     branches: ['**']
-  pull_request:
-    branches: [main]
 
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -17,7 +14,6 @@ permissions:
 
 jobs:
   check:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -33,7 +29,6 @@ jobs:
       - run: npm test
 
   build-windows:
-    if: github.event_name == 'push'
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -55,18 +50,3 @@ jobs:
           name: el-gibbor-worship-portable-${{ github.sha }}
           path: release/*/win-unpacked
           retention-days: 7
-
-  commitlint:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci --ignore-scripts
-      - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
